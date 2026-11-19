@@ -274,6 +274,10 @@ function lineChart(pts, {w = 560, h = 220, color = "var(--green)", fill = true, 
   ${fill ? `<path d="${d}L${X(pts.length - 1)},${h - 26}L${X(0)},${h - 26}Z" fill="${color}" opacity=".12"/>` : ""}<path d="${d}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>
   ${pts.map((p, i) => `<g><circle cx="${X(i)}" cy="${Y(p.y)}" r="4" fill="#fff" stroke="${color}" stroke-width="2.5"><title>${p.x} : ${fmt(p.y)}</title></circle>${i % Math.ceil(pts.length / 9) === 0 ? `<text x="${X(i)}" y="${h - 8}" font-size="10" fill="#8C9891" text-anchor="middle">${p.x}</text>` : ""}</g>`).join("")}</svg>`;
 }
+function vbars(pts, {w = 560, h = 220, color = "var(--blue)", ylab = ""} = {}) {
+  const P = 12, max = Math.max(...pts.map(p => p.y), 1) * 1.18, bw = (w - 2 * P) / pts.length, Y = v => h - 26 - v / max * (h - 40);
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="${ylab}"><line x1="${P}" x2="${w - P}" y1="${h - 26}" y2="${h - 26}" stroke="#DDE3DF"/>${pts.map((p, i) => { const x = P + i * bw + bw * 0.18, cx = x + bw * 0.32; return `<g><rect x="${x}" y="${Y(p.y)}" width="${bw * 0.64}" height="${h - 26 - Y(p.y)}" rx="4" fill="${color}"><title>${p.x} : ${fmt(p.y)}</title></rect><text x="${cx}" y="${Y(p.y) - 6}" font-size="12" font-weight="600" fill="#14281D" text-anchor="middle">${fmt(p.y)}</text><text x="${cx}" y="${h - 8}" font-size="11" fill="#8C9891" text-anchor="middle">${p.x}</text></g>`; }).join("")}</svg>`;
+}
 function hbars(items, {fmtv = v => fmt(v, 2), max} = {}) {
   max = max || Math.max(...items.map(i => i.v));
   return items.map(i => `<div style="margin:10px 0"><div class="row between small"><span style="font-weight:${i.bold ? 700 : 500}">${esc(i.l)}</span><span style="font-weight:700">${fmtv(i.v)}</span></div>
@@ -336,7 +340,7 @@ RENDER.dashboard = el => {
       <p>SupplyMe apprend le rythme d'achat de chaque foyer, prévoit quand un produit va manquer et envoie le bon panier, au bon moment.</p>
       <div class="row" style="flex-wrap:wrap"><button class="btn white" id="goDemo">Voir la démo client · 35 s</button><button class="btn ghost" id="goPred" style="background:rgba(255,255,255,.18);color:#fff">Prédictions du jour</button></div>
     </div>
-    <div class="card"><div class="row between"><h3>Rayons les plus achetés</h3>${tag("real")}</div><p class="sub">Part des produits achetés · ${fmt(D.rayons.reduce((a, r) => a + r.n, 0))} lignes de commande</p>
+    <div class="card"><div class="row between"><h3>Rayons les plus achetés</h3></div><p class="sub">Part des produits achetés · ${fmt(D.rayons.reduce((a, r) => a + r.n, 0))} lignes de commande</p>
       <div class="row" style="gap:18px;flex-wrap:wrap"><div>${donut([...top.map((r, i) => ({l: rfr(r.rayon), v: r.n, c: PAL[i]})), {l: "Autres", v: D.rayons.slice(4).reduce((a, r) => a + r.n, 0), c: "#E4EAE6"}], 160)}</div>
       <div style="flex:1;min-width:150px">${hbars(top.map((r, i) => ({l: rfr(r.rayon), v: r.part * 100, c: PAL[i]})), {fmtv: v => fmt(v, 0) + " %", max: 100})}</div></div></div>
   </div>
@@ -347,21 +351,21 @@ RENDER.dashboard = el => {
     <div class="kpi k4"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">${IC.newc}</svg></div><div class="lbl">Recommandations générées</div><div class="val">${fmt(k.recommandations)}</div>${dots(4)}</div>
   </div>
   <div class="grid g-3" style="margin-top:22px">
-    <div class="card"><div class="row between"><h3>Fiabilité du modèle</h3>${tag("real")}</div><p class="sub">Achat dans les 7 jours · période de test jamais vue</p>
+    <div class="card"><div class="row between"><h3>Fiabilité du modèle</h3></div><p class="sub">Achat dans les 7 jours · période de test jamais vue</p>
       <div class="row" style="gap:18px">${donut([{l: "AUC", v: k.auc, c: "var(--green)"}, {l: "", v: 1 - k.auc, c: "#E4EAE6"}], 130).replace(/>\d+ %</, ">" + fmt(k.auc, 3) + "<")}
       <div class="small"><p style="margin:0 0 8px"><b>${esc(k.modele_cls)}</b>, choisie sur une période de validation.</p><p class="muted" style="margin:0">Règle simple : ${fmt(k.auc_base, 3)}. 0,5 = pile ou face.</p></div></div></div>
-    <div class="card"><div class="row between"><h3>Ruptures anticipées</h3>${tag("real")}</div><p class="sub">Besoins détectés et traités au ${new Date(k.date).toLocaleDateString("fr-FR")}</p>
+    <div class="card"><div class="row between"><h3>Besoins anticipés</h3></div><p class="sub">Besoins détectés et traités au ${new Date(k.date).toLocaleDateString("fr-FR")}</p>
       <div class="big" style="color:var(--green-d)">${fmt(k.besoins_imminents + k.besoins_depasses)}</div><p class="small muted">produits relancés chez ${fmt(k.clients_relances)} foyers</p>
       ${hbars([{l: "Besoin imminent (sous 7 jours)", v: k.besoins_imminents, c: "var(--green)"}, {l: "Habitude en train d'être perdue", v: k.besoins_depasses, c: "var(--orange)"}], {fmtv: v => fmt(v)})}</div>
-    <div class="card"><div class="row between"><h3>Délai prédit</h3>${tag("real")}</div><p class="sub">Erreur moyenne sur la date du prochain achat</p>
+    <div class="card"><div class="row between"><h3>Délai prédit</h3></div><p class="sub">Erreur moyenne sur la date du prochain achat</p>
       <div class="row" style="align-items:baseline;gap:8px"><span class="big" style="color:var(--green-d)">${fmt(k.mae, 1)} j</span><span class="tag real">−${fmt((1 - k.mae / k.mae_base) * 100)} % vs règle simple</span></div>
       ${hbars([{l: esc(k.modele_reg), v: k.mae, c: "var(--green)", bold: 1}, {l: "Règle simple", v: k.mae_base, c: "#C9D2CC"}], {fmtv: v => fmt(v, 1) + " j"})}</div>
   </div>
   <div class="grid g-hero" style="margin-top:22px">
-    <div class="card"><div class="row between"><h3>Activité du système</h3>${tag("real", "Prédictions réelles")}</div><p class="sub">Besoins prévus jour par jour pour les 3 prochaines semaines, et messages programmés</p>${lineChart(D.activite.map(a => ({x: new Date(a.jour).toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit"}), y: a.besoins})), {ylab: "Besoins prévus par jour"})}<div class="legend"><span><i style="background:var(--green)"></i>Produits dont le besoin est prévu ce jour-là</span><span>${fmt(D.activite.reduce((a, x) => a + x.messages, 0))} messages programmés</span></div></div>
-    <div class="card"><div class="row between"><h3>Profit de la campagne</h3>${tag("real", "Calcul sur données réelles")}</div><p class="sub">Profit supplémentaire estimé, mêmes produits pour chaque stratégie</p>
+    <div class="card"><div class="row between"><h3>Messages à envoyer</h3></div><p class="sub">Foyers contactés chaque jour de la première semaine. Le jour 1 reconquiert les habitudes perdues ; les jours suivants suivent les besoins à venir.</p>${vbars(D.activite.slice(0, 7).map(a => ({x: new Date(a.jour).toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit"}), y: a.messages})), {ylab: "Foyers contactés par jour"})}<div class="legend"><span><i style="background:var(--blue)"></i>Foyers recevant un message ce jour-là</span><span>${fmt(D.activite.reduce((a, x) => a + x.messages, 0))} messages au total</span></div></div>
+    <div class="card"><div class="row between"><h3>Profit de la campagne</h3>${tag("sim", "Scénario")}</div><p class="sub">Profit supplémentaire estimé, mêmes produits pour chaque stratégie</p>
       ${hbars(D.strategies.filter(s => s.strategy !== "Aucune relance").map(s => ({l: s.strategy, v: s.incremental_profit, c: s.strategy.startsWith("SupplyMe") ? "var(--green)" : "#C9D2CC", bold: s.strategy.startsWith("SupplyMe")})), {fmtv: usd})}
-      <p class="small muted" style="margin-top:10px">Effet d'un rappel et coût d'un message : hypothèses (voir Analytics).</p></div>
+      <p class="small muted" style="margin-top:10px">Prix, marge, effet d'un rappel, réaction à une réduction et coût d'un message : hypothèses (voir Analytics).</p></div>
   </div>
   <div class="card" style="margin-top:22px"><h3>Comment fonctionne SupplyMe</h3><p class="sub">Quatre étapes, du ticket de caisse à la notification</p>
     <div class="steps">
@@ -381,7 +385,7 @@ RENDER.predictions = el => {
   el.innerHTML = `<div class="filters"><select id="pf"><option value="">Tous les foyers</option>${foyers.map(f => `<option>${f}</option>`).join("")}</select>
     <select id="pr"><option value="">Tous les rayons</option>${rayons.map(r => `<option value="${r}">${rfr(r)}</option>`).join("")}</select>
     <div class="chips" id="pu"><button class="chip on" data-u="">Toutes</button><button class="chip" data-u="crit">Urgent</button><button class="chip" data-u="soon">Cette semaine</button><button class="chip" data-u="dep">Habitude perdue</button></div>
-    <span style="flex:1"></span>${tag("real")}</div>
+    <span style="flex:1"></span></div>
     <p class="small muted" style="margin:-6px 0 16px">Instacart n'observe pas les placards : SupplyMe estime le <b>jour du prochain besoin</b> et la part du cycle habituel déjà écoulée, pas une quantité restante.</p>
     <div class="pgrid" id="plist"></div>`;
   let U = "";
@@ -420,7 +424,7 @@ RENDER.models = el => {
      ${D.rvp.map(p => `<circle cx="${X(p.reel)}" cy="${Y(p.predit)}" r="3" fill="var(--green)" opacity=".28"/>`).join("")}
      ${[0, 30, 60].map(t => `<text x="${X(t)}" y="${h - 8}" font-size="10" fill="#8C9891" text-anchor="middle">${t} j</text><text x="${P - 6}" y="${Y(t) + 4}" font-size="10" fill="#8C9891" text-anchor="end">${t}</text>`).join("")}</svg>`; })();
   el.innerHTML = `
-  <div class="card"><div class="row between"><h3>L'IA de SupplyMe, en trois idées</h3>${tag("real")}</div>
+  <div class="card"><div class="row between"><h3>L'IA de SupplyMe, en trois idées</h3></div>
     <div class="steps" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px">
       <div class="step"><div class="n">1</div><h4>Des « photos » dans le temps</h4><p>À une date donnée, le modèle ne voit que le passé, puis on regarde ce qui s'est vraiment passé ensuite. Il s'entraîne sur janvier–juin et il est testé sur août–septembre.</p></div>
       <div class="step"><div class="n">2</div><h4>25 indices par produit</h4><p>Jours depuis le dernier achat, rythme habituel, régularité, part des commandes avec ce produit, rythme du foyer…</p></div>
@@ -445,20 +449,20 @@ RENDER.models = el => {
 
 /* ===================== 04 Foyers ===================== */
 RENDER.customers = el => {
-  el.innerHTML = `<div class="filters"><select id="cf">${D.foyers.map(f => `<option ${f.foyer === D.foyer_demo ? "selected" : ""}>${f.foyer}</option>`).join("")}</select><span style="flex:1"></span>${tag("real")}</div><div id="cbody"></div>`;
+  el.innerHTML = `<div class="filters"><select id="cf">${D.foyers.map(f => `<option ${f.foyer === D.foyer_demo ? "selected" : ""}>${f.foyer}</option>`).join("")}</select><span style="flex:1"></span></div><div id="cbody"></div>`;
   const JOURS = ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."];
   const draw = () => {
     const id = +el.querySelector("#cf").value, f = D.foyers.find(x => x.foyer === id), H = D.historique.filter(h => h.foyer === id), hab = D.habitudes.filter(h => h.foyer === id);
     const gaps = H.slice(1).map((h, i) => (new Date(h.date) - new Date(H[i].date)) / 864e5), gm = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
     el.querySelector("#cbody").innerHTML = `
     <div class="grid g-4">
-      <div class="kpi k1"><div class="lbl">Taille du foyer</div><div class="val">${f.taille} pers.</div><div class="small muted">répartition officielle EIA</div></div>
+      <div class="kpi k1"><div class="lbl">Taille du foyer</div><div class="val">${f.taille} pers.</div><div class="small muted">estimée à partir du panier (parts EIA)</div></div>
       <div class="kpi k2"><div class="lbl">Commandes</div><div class="val">${H.length}</div><div class="small muted">une tous les ${fmt(gm, 1)} jours</div></div>
       <div class="kpi k3"><div class="lbl">Panier moyen</div><div class="val">${usd(H.reduce((a, h) => a + h.montant, 0) / Math.max(H.length, 1))}</div><div class="small muted">${fmt(f.panier, 1)} produits</div></div>
       <div class="kpi k4"><div class="lbl">Moment habituel</div><div class="val">${JOURS[f.jour] || ""} ${f.heure} h</div><div class="small muted">heure réelle Instacart</div></div>
     </div>
     <div class="grid g-hero" style="margin-top:22px">
-      <div class="card"><h3>Historique des commandes</h3><p class="sub">Montant de chaque commande (prix ancrés sur le BLS)</p>${lineChart(H.map(h => ({x: new Date(h.date).toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit"}), y: h.montant})), {color: "var(--blue)", ylab: "Montant"})}</div>
+      <div class="card"><h3>Historique des commandes</h3><p class="sub">Montant de chaque commande à prix simulés (ancrés sur le BLS)</p>${lineChart(H.map(h => ({x: new Date(h.date).toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit"}), y: h.montant})), {color: "var(--blue)", ylab: "Montant"})}</div>
       <div class="card"><h3>Produits récurrents</h3><p class="sub">Achetés au moins 3 fois</p>${hab.slice(0, 6).map(h => `<div class="row" style="margin:8px 0">${art(h.produit, h.rayon, 40)}<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.produit)}</div><div class="small muted">${h.achats} achats · tous les ${fmt(h.cycle, 1)} j</div></div></div>`).join("") || '<p class="muted">Pas encore d\'habitude.</p>'}</div>
     </div>`;
   };
@@ -468,14 +472,14 @@ RENDER.customers = el => {
 /* ===================== 05 Recommandations ===================== */
 RENDER.reco = el => {
   const ids = [...new Set(D.recos.map(r => r.foyer))];
-  el.innerHTML = `<div class="filters"><select id="rf">${ids.map(i => `<option ${i === D.foyer_demo ? "selected" : ""}>${i}</option>`).join("")}</select><span style="flex:1"></span>${tag("real", "Décision calculée")}${tag("sim", "Commande simulée")}</div><div id="rbody"></div>`;
+  el.innerHTML = `<div class="filters"><select id="rf">${ids.map(i => `<option ${i === D.foyer_demo ? "selected" : ""}>${i}</option>`).join("")}</select><span style="flex:1"></span>${tag("sim", "Commande simulée")}</div><div id="rbody"></div>`;
   const draw = () => {
     const id = +el.querySelector("#rf").value, R = D.recos.filter(r => r.foyer === id), first = R[0];
     const tot = R.reduce((a, r) => a + r.prix * (1 - r.remise), 0), save = R.reduce((a, r) => a + r.prix * r.remise, 0);
     el.querySelector("#rbody").innerHTML = `<div class="grid g-hero">
       <div class="card"><div class="row between"><h3>Panier recommandé</h3><span class="tag ex">${R.length} produits</span></div><p class="sub">Envoi le ${new Date(first.envoi).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})} à ${first.heure} h, une heure avant l'heure habituelle de commande</p>
         ${R.map(r => { const [lab, c, bg] = DEC[r.decision]; return `<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)">${art(r.produit, r.rayon, 46)}<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${esc(r.produit)}</div>
-          <div class="small muted">${r.segment === "besoin dépassé" ? "Habitude en train d'être perdue" : "Besoin le " + new Date(r.date).toLocaleDateString("fr-FR", {day: "numeric", month: "short"})} · achat spontané ${fmt(r.proba * 100)} % → ${fmt(r.proba_action * 100)} %</div></div>
+          <div class="small muted">${r.segment === "besoin dépassé" ? "Habitude en train d'être perdue" : "Besoin le " + new Date(r.date).toLocaleDateString("fr-FR", {day: "numeric", month: "short"})} · probabilité d'achat sous 7 jours ${fmt(r.proba * 100)} % sans contact → ${fmt(r.proba_action * 100)} % avec cette action</div></div>
           <span class="tag" style="background:${bg};color:${c}">${lab}${r.remise ? " −" + fmt(r.remise * 100) + " %" : ""}</span><div style="width:80px;text-align:right"><b>${usd(r.prix * (1 - r.remise))}</b>${r.remise ? `<div class="small muted" style="text-decoration:line-through">${usd(r.prix)}</div>` : ""}</div></div>`; }).join("")}
         <div class="row between" style="margin-top:14px"><span class="muted">Total · économie ${usd(save)}</span><span class="big" style="font-size:26px">${usd(tot)}</span></div>
         <button class="btn green" style="margin-top:14px" id="simCmd">Simuler la commande</button></div>
@@ -498,12 +502,12 @@ RENDER.analytics = el => {
   const S = D.sensibilite, smax = Math.max(...S.data.flat());
   const sens = `<table><thead><tr><th>Effet d'un rappel ↓ / élasticité →</th>${S.columns.map(c => `<th class="n">${String(c).replace(".", ",")}</th>`).join("")}</tr></thead><tbody>${S.data.map((r, i) => `<tr><td>${S.index[i].replace(".", ",")}</td>${r.map((v, j) => `<td class="n" style="background:rgba(30,164,92,${.08 + .5 * v / smax});font-weight:${S.index[i] === "5.0%" && S.columns[j] === "2.62" ? 800 : 500}">${fmt(v)} $</td>`).join("")}</tr>`).join("")}</tbody></table>`;
   el.innerHTML = `
-  <div class="grid g-hero"><div class="card"><div class="row between"><h3>Quand les foyers commandent</h3>${tag("real")}</div><p class="sub">Nombre de commandes par jour et par heure : la base du moment d'envoi</p>${heat}</div>
-    <div class="card"><div class="row between"><h3>Plus d'historique, plus de précision</h3>${tag("real")}</div><p class="sub">AUC selon le nombre de commandes déjà passées</p>${hbars(D.froid_historique.map(h => ({l: h.historique + " commandes", v: h.AUC, c: "var(--blue)"})), {fmtv: v => fmt(v, 3), max: 1})}</div></div>
+  <div class="grid g-hero"><div class="card"><div class="row between"><h3>Quand les foyers commandent</h3></div><p class="sub">Nombre de commandes par jour et par heure : la base du moment d'envoi</p>${heat}</div>
+    <div class="card"><div class="row between"><h3>Plus d'historique, plus de précision</h3></div><p class="sub">AUC selon le nombre de commandes déjà passées</p>${hbars(D.froid_historique.map(h => ({l: h.historique + " commandes", v: h.AUC, c: "var(--blue)"})), {fmtv: v => fmt(v, 3), max: 1})}</div></div>
   <div class="grid g-2" style="margin-top:22px">
-    <div class="card"><div class="row between"><h3>Rentabilité des stratégies</h3>${tag("real", "Calcul sur données réelles")}</div><p class="sub">Profit supplémentaire, coûts des réductions et des messages</p>
+    <div class="card"><div class="row between"><h3>Rentabilité des stratégies</h3>${tag("sim", "Scénario")}</div><p class="sub">Profit supplémentaire, coûts des réductions et des messages</p>
       <table><thead><tr><th>Stratégie</th><th class="n">Foyers</th><th class="n">Réductions</th><th class="n">Profit</th></tr></thead><tbody>${D.strategies.map(s => `<tr class="${s.strategy.startsWith("SupplyMe") ? "best" : ""}"><td>${esc(s.strategy)}</td><td class="n">${fmt(s.customers_contacted)}</td><td class="n">${usd(s.discount_cost)}</td><td class="n">${usd(s.incremental_profit)}</td></tr>`).join("")}</tbody></table></div>
-    <div class="card"><div class="row between"><h3>Et si nos hypothèses étaient fausses ?</h3>${tag("sim", "Analyse de sensibilité")}</div><p class="sub">Profit SupplyMe selon l'effet d'un rappel et l'élasticité-prix (−2,62 : Bijmolt et al., 2005)</p>${sens}<p class="small muted">Le profit reste positif dans tous les scénarios testés.</p></div></div>`;
+    <div class="card"><div class="row between"><h3>Et si nos hypothèses étaient fausses ?</h3></div><p class="sub">Profit SupplyMe selon l'effet d'un rappel et l'élasticité-prix (−2,62 : Bijmolt et al., 2005)</p>${sens}<p class="small muted">Le montant du profit dépend fortement de ces hypothèses. Un pilote avec un groupe témoin sans message permettrait de les mesurer.</p></div></div>`;
 };
 
 /* ===================== 07 Nouveaux clients ===================== */
@@ -516,14 +520,14 @@ RENDER.newc = el => {
       <div id="qopts">${opts.map(r => `<button class="q-opt" data-r="${r.rayon}">${rfr(r.rayon)}</button>`).join("")}</div>
       <div class="row between" style="margin-top:16px;flex-wrap:wrap;gap:12px"><div><span class="points" id="pts">0</span> <span class="muted">points</span> <span class="small muted" id="ptsv"></span></div><span class="small muted">${H.points_rayon} pts par rayon · +${H.bonus} pts pour 3 rayons · 100 pts = 1 $</span></div>
       <h3 style="font-size:17px;margin-top:18px">Votre panier de bienvenue</h3><div class="pgrid" id="wb" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:10px"></div></div>
-    <div class="card"><div class="row between"><h3>Ce que disent les vraies données</h3>${tag("real")}</div><p class="sub">1re commande réelle de 1 500 clients « nouveaux » (holdout)</p>
+    <div class="card"><div class="row between"><h3>Ce que disent les vraies données</h3></div><p class="sub">1re commande réelle de 1 500 clients « nouveaux » (holdout)</p>
       ${hbars(D.bienvenue_eval.map(e => ({l: e.method, v: e.recall_at_10, c: e.method.startsWith("Les 10") || e.method.startsWith("Panier de bienvenue") ? "var(--green)" : e.method.startsWith("Placebo") ? "#C9D2CC" : "var(--violet)"})), {fmtv: v => fmt(v, 2) + " %"})}
       <div class="note" style="margin-top:10px">Pour une toute première commande, les <b>best-sellers</b> restent la meilleure proposition. Le questionnaire sert surtout à <b>connaître le client</b> et à démarrer la relation.</div></div></div>
   <div class="grid g-3" style="margin-top:22px">
-    <div class="card"><div class="row between"><h3>0 → 1 commande</h3>${tag("real")}</div><p class="sub">Part du 2e panier qu'on peut deviner</p>${hbars(D.froid_couverture.map(c => ({l: c.situation, v: c["part du 2e panier retrouvée"] * 100, c: "var(--orange)"})), {fmtv: v => fmt(v, 1) + " %", max: 40})}<p class="small muted">Une seule commande vaut 4 fois plus que la popularité.</p></div>
-    <div class="card"><div class="row between"><h3>Après le 1er achat</h3>${tag("real")}</div><p class="sub">Modèle à froid : il s'appuie sur le rythme des autres clients</p>${hbars(D.froid_produits.map(f => ({l: f.methode, v: f["AUC (achat sous 7 j)"], c: f.methode.startsWith("Modèle") ? "var(--green)" : "#C9D2CC"})), {fmtv: v => "AUC " + fmt(v, 3), max: 1})}
+    <div class="card"><div class="row between"><h3>0 → 1 commande</h3></div><p class="sub">Part du 2e panier qu'on peut deviner</p>${hbars(D.froid_couverture.map(c => ({l: c.situation, v: c["part du 2e panier retrouvée"] * 100, c: "var(--orange)"})), {fmtv: v => fmt(v, 1) + " %", max: 40})}<p class="small muted">Une seule commande vaut 4 fois plus que la popularité.</p></div>
+    <div class="card"><div class="row between"><h3>Après le 1er achat</h3></div><p class="sub">Modèle à froid : il s'appuie sur le rythme des autres clients</p>${hbars(D.froid_produits.map(f => ({l: f.methode, v: f["AUC (achat sous 7 j)"], c: f.methode.startsWith("Modèle") ? "var(--green)" : "#C9D2CC"})), {fmtv: v => "AUC " + fmt(v, 3), max: 1})}
       <p class="small muted">Erreur sur le délai : ${fmt(D.froid_produits[1]["MAE délai (j)"], 1)} j contre ${fmt(D.froid_produits[0]["MAE délai (j)"], 1)} j.</p></div>
-    <div class="card"><div class="row between"><h3>Souvent achetés ensemble</h3>${tag("real")}</div><p class="sub">Règles d'association sur les vrais paniers</p>${D.associations.filter(a => a.produit === "Banana").sort((a, b) => b.lift - a.lift).slice(0, 4).map(a => `<div class="row" style="margin:8px 0">${art("banana", "", 34)}<span class="muted">→</span>${art(a.complement, "", 34)}<div style="flex:1"><div style="font-weight:600;font-size:13px">${esc(a.complement)}</div><div class="small muted">${fmt(a.lift, 1)} fois plus souvent ensemble</div></div></div>`).join("")}</div></div>`;
+    <div class="card"><div class="row between"><h3>Souvent achetés ensemble</h3></div><p class="sub">Règles d'association sur les vrais paniers</p>${D.associations.filter(a => a.produit === "Banana").sort((a, b) => b.lift - a.lift).slice(0, 4).map(a => `<div class="row" style="margin:8px 0">${art("banana", "", 34)}<span class="muted">→</span>${art(a.complement, "", 34)}<div style="flex:1"><div style="font-weight:600;font-size:13px">${esc(a.complement)}</div><div class="small muted">${fmt(a.lift, 1)} fois plus souvent ensemble</div></div></div>`).join("")}</div></div>`;
   const top = D.top_rayon;
   const draw = () => {
     const k = choix.size, pts = k * H.points_rayon + (k >= 3 ? H.bonus : 0);
@@ -555,7 +559,7 @@ const DEMO = (() => {
 const TAB = (on) => `<div class="tabbar">${[["Accueil", IC.dash], ["Prévisions", IC.pred], ["Panier", IC.reco], ["Profil", IC.cust]].map(([l, ic], i) => `<span class="${i === on ? "on" : ""}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg>${l}</span>`).join("")}</div>`;
 const cart = new Map();
 const SCREENS = {
-  home: () => { const promo = DEMO.R.find(r => r.remise) || DEMO.star; return `<div class="row between"><div><div class="small muted">Bonjour,</div><div class="h" style="font-size:22px;font-weight:600">Foyer ${D.foyer_demo}</div></div><span class="avatar">${art("avocado", "", 44)}</span></div>
+  home: () => { const promo = DEMO.R.find(r => r.remise) || DEMO.star; return `<div class="row between"><div><div class="small muted">Bonjour,</div><div class="h" style="font-size:22px;font-weight:600">Léa</div></div><span class="avatar">${art("avocado", "", 44)}</span></div>
     <div class="m-hero"><div class="art">${art(promo.produit, promo.rayon, 96)}</div><b>${promo.remise ? "−" + fmt(promo.remise * 100) + " % rien que pour vous" : "Votre panier vous attend"}</b><div class="small" style="opacity:.95;margin-top:4px">${esc(promo.produit)}</div></div>
     <div class="row between"><b class="h" style="font-size:17px">Bientôt à court</b><span class="small" style="color:var(--green-d);font-weight:600">Voir tout</span></div>
     ${DEMO.R.slice(0, 4).map(r => itemRow(r)).join("")}`; },
@@ -573,16 +577,16 @@ const SCREENS = {
     ${DEMO.R.slice(0, 5).map(r => itemRow(r, true)).join("")}<button class="btn green" style="width:100%;justify-content:center;margin-top:6px" data-act="addall">Tout ajouter au panier</button>`,
   cart: () => { const items = [...cart.values()], tot = items.reduce((a, r) => a + r.prix * (1 - r.remise), 0); return `<b class="h" style="font-size:20px">Mon panier</b>
     ${items.length ? items.map(r => itemRow(r)).join("") : '<p class="muted">Panier vide.</p>'}<div class="row between" style="margin:10px 0"><span class="muted">Total</span><b class="big" style="font-size:24px">${usd(tot)}</b></div>
-    <button class="btn green" style="width:100%;justify-content:center" data-act="order">Commander</button><p class="small muted" style="text-align:center">${tag("sim")}</p>`; },
-  done: () => `<div style="text-align:center;padding-top:40px">${basketArt().replace('width="100%"', 'width="220"')}<b class="h" style="font-size:24px;display:block;margin-top:10px">C'est commandé !</b><p class="muted">Livraison demain matin. Vous ne serez plus jamais à court.</p>${tag("sim", "Réapprovisionnement simulé")}</div>`,
+    <button class="btn green" style="width:100%;justify-content:center" data-act="order">Commander</button><p class="small muted" style="text-align:center">${tag("sim", "Commande simulée")}</p>`; },
+  done: () => `<div style="text-align:center;padding-top:40px">${basketArt().replace('width="100%"', 'width="220"')}<b class="h" style="font-size:24px;display:block;margin-top:10px">C'est commandé !</b><p class="muted">Livraison demain matin. Vous ne serez plus jamais à court.</p>${tag("sim", "Commande simulée")}</div>`,
   welcome: () => `<b class="h" style="font-size:20px">Bienvenue sur SupplyMe</b><p class="small muted">Dites-nous ce que vous aimez : 10 points par rayon, 50 points de bonus pour 3 rayons.</p>
     <div>${["produce", "dairy eggs", "snacks", "beverages", "bakery", "frozen", "pantry", "deli"].map(r => `<button class="q-opt ${["produce", "dairy eggs", "bakery"].includes(r) ? "on" : ""}">${rfr(r)}</button>`).join("")}</div>
-    <div class="m-item" style="margin-top:14px;justify-content:space-between"><span>Points gagnés</span><span class="points">80</span></div>${tag("ex", "Exemple de nouveau compte")}`
+    <div class="m-item" style="margin-top:14px;justify-content:space-between"><span>Points gagnés</span><span class="points">80</span></div>`
 };
 function itemRow(r, add) { const [lab, c, bg] = DEC[r.decision]; const dep = r.segment === "besoin dépassé";
   return `<div class="m-item">${art(r.produit, r.rayon, 46)}<div class="t"><b>${esc(r.produit)}</b><span class="small" style="color:${dep ? "var(--berry)" : "var(--orange)"};font-weight:600">${dep ? "À racheter" : "Dans " + Math.max(1, Math.round(r.jours)) + " j"}</span>${r.remise ? ` <span class="tag" style="background:${bg};color:${c};padding:2px 8px">−${fmt(r.remise * 100)} %</span>` : ""}</div><b>${usd(r.prix * (1 - r.remise))}</b>${add ? `<button class="btn ghost" style="padding:6px 10px" data-add="${esc(r.produit)}">+</button>` : ""}</div>`; }
 const STORY = [
-  ["home", 0, "Léa utilise SupplyMe", "Son application de courses habituelle. (Foyer réel n° " + D.foyer_demo + ", prénom fictif)"],
+  ["home", 0, "Léa utilise SupplyMe", "Son application de courses habituelle."],
   ["history", 0, "Elle fait ses achats habituels", "Chaque commande enrichit son historique."],
   ["analyse", 1, "SupplyMe analyse son historique", "Rythme, régularité, heure de commande…"],
   ["predict", 1, "Un produit va bientôt manquer", "Le modèle estime le jour du prochain besoin."],
@@ -604,14 +608,14 @@ const demo = {i: 0, t: 0, timer: null, playing: false, DUR: 5000,
 };
 RENDER.client = el => {
   el.innerHTML = `<div class="client">
-    <div class="story"><div class="card" style="padding:18px"><div class="row between"><h3>La démo en 35 secondes</h3>${tag("ex")}</div><p class="sub" style="margin:6px 0 0">7 étapes de 5 secondes. Cliquez sur une étape, ou directement dans le téléphone pour l'explorer.</p></div>
+    <div class="story"><div class="card" style="padding:18px"><div class="row between"><h3>La démo en 35 secondes</h3></div><p class="sub" style="margin:6px 0 0">7 étapes de 5 secondes. Cliquez sur une étape, ou directement dans le téléphone pour l'explorer.</p></div>
       ${STORY.map((s, i) => `<button data-i="${i}"><span class="k">${i + 1}</span><div><b>${s[2]}</b><span>${s[3]}</span></div></button>`).join("")}</div>
     <div><div class="phone"><div class="screen"><div class="notch"></div><div class="sbar"><span>9:41</span><span>SupplyMe</span></div><div id="scrHost"></div></div></div>
       <div class="prog">${STORY.map((_, i) => `<i data-i="${i}"><b></b></i>`).join("")}</div>
       <div class="ctrl"><button id="playBtn">Lecture</button><button id="restart">Recommencer</button><button id="newUser">Nouveau client</button></div></div>
     <div><div class="caption"><b id="capT"></b><p class="muted small" id="capS" style="margin:6px 0 0"></p></div>
       <div class="card" style="margin-top:16px"><h3 style="font-size:17px">Ce que voit le client</h3><p class="small muted" style="line-height:1.55">Le foyer ne voit que ce qui l'aide : ses produits, ses dates de besoin, ses offres. Les chiffres « business » (profit, modèles, statistiques) restent dans l'espace pro.</p>
-      <div class="row" style="flex-wrap:wrap;gap:6px">${tag("real", "Produits et décisions réels")}${tag("ex", "Prénom fictif")}${tag("sim", "Commande simulée")}</div></div></div></div>`;
+      <div class="row" style="flex-wrap:wrap;gap:6px">${tag("sim", "Commande simulée")}</div></div></div></div>`;
   el.querySelector(".story").onclick = e => { const b = e.target.closest("button[data-i]"); if (b) { demo.stop(); demo.show(+b.dataset.i); } };
   el.querySelector(".prog").onclick = e => { const b = e.target.closest("i"); if (b) { demo.stop(); demo.show(+b.dataset.i); } };
   el.querySelector("#playBtn").onclick = () => demo.playing ? demo.stop() : (demo.i === STORY.length - 1 && demo.t >= demo.DUR && demo.show(0), demo.play());
