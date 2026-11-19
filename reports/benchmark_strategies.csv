@@ -1,0 +1,5 @@
+strategie,clients_contactes,achats_incrementaux,cout_contacts,cout_reductions,profit_incremental,roi
+Aucune relance,0,0.0,0.0,0.0,0.0,
+Relance de masse sans réduction,1485,270.9,74.25,0.0,329.2,4.434
+Relance de masse -10 %,1485,948.1,74.25,858.51,479.3,0.514
+SupplyMe (ciblé et optimisé),1428,893.3,71.4,662.29,650.45,0.887

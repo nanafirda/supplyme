@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SupplyMe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1EA45C;--green-d:#0F7A41;--green-l:#E6F6EC;--mint:#F2FAF5;--bg:#F5F7F6;--ink:#14281D;--muted:#5E6B64;
+  --line:#E4EAE6;--orange:#FF8A34;--orange-l:#FFF0E3;--berry:#E5484D;--berry-l:#FDECEC;--sun:#FFC53D;--sun-l:#FFF7DD;
+  --blue:#3B6FE0;--blue-l:#EAF0FD;--violet:#7B5CE6;--violet-l:#F1EDFD;--r:22px;--fh:Jost,Inter,system-ui,-apple-system,'Segoe UI',sans-serif
+}
+*{box-sizing:border-box}
+html,body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:#1D9A57}
+h1,h2,h3,.h{font-family:var(--fh);margin:0;letter-spacing:-.01em}
+button{font-family:inherit;cursor:pointer}
+.stage{min-height:100vh;padding:28px;background:radial-gradient(1200px 600px at 10% -10%,#4CC47E 0,transparent 60%),radial-gradient(900px 500px at 110% 110%,#46BE79 0,transparent 55%),linear-gradient(135deg,#22A85E,#178C4E)}
+.shell{display:flex;background:var(--bg);border-radius:34px;min-height:calc(100vh - 56px);overflow:hidden;box-shadow:0 30px 80px rgba(0,40,20,.25)}
+/* ---------- barre latérale ---------- */
+.side{width:132px;background:#fff;display:flex;flex-direction:column;align-items:center;padding:26px 0;gap:6px;flex-shrink:0}
+.logo{font-family:var(--fh);font-weight:700;font-size:18px;margin-bottom:22px;display:flex;align-items:center;gap:6px}
+.logo b{color:var(--green)}
+.logo .mark{width:30px;height:30px;border-radius:10px;background:var(--green);display:grid;place-items:center}
+.nav{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav button{position:relative;width:100%;background:none;border:0;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#8C9891;font-size:12.5px;font-weight:500}
+.nav button svg{width:24px;height:24px}
+.nav button.on{color:var(--green)}
+.nav button.on::after{content:"";position:absolute;right:0;top:12px;bottom:12px;width:4px;border-radius:4px 0 0 4px;background:var(--green)}
+.nav button:hover{color:var(--green-d)}
+.side .spacer{flex:1}
+/* ---------- contenu ---------- */
+main{flex:1;min-width:0;padding:26px 34px 40px;overflow:auto}
+.top{display:flex;align-items:center;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.top .title{flex:1;min-width:200px}
+.top .title h1{font-size:30px}
+.top .title p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.switch{display:flex;background:#fff;border-radius:999px;padding:5px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.switch button{border:0;background:none;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted)}
+.switch button.on{background:var(--green);color:#fff}
+.hello{display:flex;align-items:center;gap:10px;font-family:var(--fh);font-weight:500}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--sun);display:grid;place-items:center;overflow:hidden}
+.bell{position:relative;width:42px;height:42px;border-radius:14px;background:#fff;border:0;display:grid;place-items:center;color:var(--muted)}
+.bell i{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--berry)}
+.view{display:none;animation:fade .45s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:22px}
+.g-hero{grid-template-columns:minmax(0,1.65fr) minmax(0,1fr)}
+.g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:#fff;border-radius:var(--r);padding:22px;box-shadow:0 2px 10px rgba(20,40,29,.04);position:relative}
+.card h3{font-size:20px;margin-bottom:4px}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.tag.real{background:var(--green-l);color:var(--green-d)}
+.tag.sim{background:var(--violet-l);color:var(--violet)}
+.tag.ex{background:var(--sun-l);color:#9A6A00}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.big{font-family:var(--fh);font-weight:600;font-size:34px;line-height:1}
+/* hero */
+.hero{background:linear-gradient(120deg,#25B064,#47C47C);color:#fff;border-radius:28px;padding:34px 34px 34px 46%;position:relative;min-height:250px;overflow:visible}
+.hero h2{font-size:36px;line-height:1.08;margin-bottom:10px}
+.hero p{margin:0 0 18px;opacity:.95;max-width:420px;line-height:1.5}
+.hero .art{position:absolute;left:10px;bottom:-12px;width:44%;max-width:330px}
+.hero .blob{position:absolute;right:-60px;top:-80px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.1)}
+.btn{border:0;border-radius:14px;padding:12px 18px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.btn.white{background:#fff;color:var(--green-d)}
+.btn.green{background:var(--green);color:#fff}
+.btn.ghost{background:var(--green-l);color:var(--green-d)}
+/* KPI */
+.kpi{border-radius:var(--r);padding:20px;color:var(--ink);position:relative;overflow:hidden;transition:transform .2s}
+.kpi:hover{transform:translateY(-3px)}
+.kpi .ic{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;margin-bottom:14px}
+.kpi .lbl{font-size:13px;color:var(--muted);font-weight:500}
+.kpi .val{font-family:var(--fh);font-weight:600;font-size:32px;margin-top:4px}
+.kpi .dots{position:absolute;right:16px;bottom:18px;display:flex;gap:4px;align-items:flex-end}
+.kpi .dots i{width:6px;border-radius:3px;opacity:.85}
+.k1{background:var(--green-l)}.k1 .ic{background:var(--green)}.k1 .dots i{background:var(--green)}
+.k2{background:var(--orange-l)}.k2 .ic{background:var(--orange)}.k2 .dots i{background:var(--orange)}
+.k3{background:var(--blue-l)}.k3 .ic{background:var(--blue)}.k3 .dots i{background:var(--blue)}
+.k4{background:var(--berry-l)}.k4 .ic{background:var(--berry)}.k4 .dots i{background:var(--berry)}
+/* how it works */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:s}
+.step{background:var(--mint);border-radius:18px;padding:18px;position:relative}
+.step .n{font-family:var(--fh);font-weight:700;font-size:15px;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#fff;color:var(--green-d);margin-bottom:12px}
+.step h4{font-family:var(--fh);font-size:17px;margin:0 0 6px}
+.step p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+/* products */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.pcard{background:#fff;border-radius:20px;padding:16px;box-shadow:0 2px 10px rgba(20,40,29,.04);display:flex;flex-direction:column;gap:10px;transition:transform .2s,box-shadow .2s;border:2px solid transparent}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(20,40,29,.08)}
+.pcard.urg{border-color:#FFD2D3}
+.pcard .pname{font-family:var(--fh);font-weight:600;font-size:15.5px;line-height:1.25;min-height:40px}
+.bar{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:8px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:0;background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--muted);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.chip.on{background:var(--ink);color:#fff}
+select{font-family:inherit;font-size:14px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.filters{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;padding:10px 8px;border-bottom:1px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.best td{font-weight:700;color:var(--green-d)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%}
+svg text{font-family:Inter,sans-serif}
+.note{background:var(--mint);border-radius:16px;padding:14px 16px;font-size:13.5px;line-height:1.55;color:#2C4136}
+.note b{color:var(--green-d)}
+/* ---------- espace client ---------- */
+.client{display:grid;grid-template-columns:minmax(0,1fr) 380px minmax(0,1fr);gap:30px;align-items:start}
+.story{display:flex;flex-direction:column;gap:10px}
+.story button{text-align:left;border:0;background:#fff;border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;color:var(--ink);transition:background .2s}
+.story button .k{font-family:var(--fh);font-weight:700;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--green-l);color:var(--green-d);flex-shrink:0}
+.story button.on{background:var(--green);color:#fff}
+.story button.on .k{background:#fff}
+.story button b{font-family:var(--fh);font-size:15px;display:block}
+.story button span{font-size:12.5px;opacity:.85}
+.phone{width:360px;height:740px;border-radius:52px;background:#0F1A14;padding:14px;box-shadow:0 30px 60px rgba(0,0,0,.25);position:relative;margin:0 auto}
+.screen{width:100%;height:100%;border-radius:40px;background:var(--bg);overflow:hidden;position:relative}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:28px;border-radius:20px;background:#0F1A14;z-index:5}
+.sbar{height:44px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 26px 4px;font-size:13px;font-weight:600}
+.scr{position:absolute;inset:44px 0 0 0;padding:10px 18px 90px;overflow:auto;animation:slide .45s ease}
+@keyframes slide{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:78px;background:#fff;display:flex;justify-content:space-around;align-items:center;padding-bottom:12px;border-top:1px solid var(--line)}
+.tabbar span{display:flex;flex-direction:column;align-items:center;font-size:10.5px;color:#9AA49F;gap:3px}
+.tabbar span.on{color:var(--green)}
+.tabbar svg{width:22px;height:22px}
+.m-hero{background:linear-gradient(120deg,#25B064,#47C47C);border-radius:22px;color:#fff;padding:16px 16px 16px 112px;position:relative;min-height:116px;margin:8px 0 16px}
+.m-hero .art{position:absolute;left:8px;bottom:-6px;width:100px}
+.m-hero b{font-family:var(--fh);font-size:19px;display:block;line-height:1.15}
+.m-item{background:#fff;border-radius:18px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.m-item .t{flex:1;min-width:0}
+.m-item .t b{font-family:var(--fh);font-size:14.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif{position:absolute;top:52px;left:12px;right:12px;background:rgba(255,255,255,.97);border-radius:22px;padding:14px;box-shadow:0 16px 40px rgba(0,0,0,.18);display:flex;gap:12px;z-index:6;animation:drop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes drop{from{transform:translateY(-120px)}to{transform:none}}
+.notif b{font-family:var(--fh);font-size:14.5px}
+.scan{height:160px;border-radius:22px;background:#fff;display:grid;place-items:center;position:relative;overflow:hidden;margin:10px 0}
+.scan::after{content:"";position:absolute;left:0;right:0;height:50px;background:linear-gradient(transparent,rgba(30,164,92,.25),transparent);animation:sweep 1.6s linear infinite}
+@keyframes sweep{from{top:-50px}to{top:160px}}
+.pulse{animation:pulse 1.2s ease infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:16px}
+.ctrl button{border:0;border-radius:14px;padding:10px 16px;font-weight:600;background:#fff;color:var(--ink)}
+.prog{display:flex;gap:5px;margin:16px auto 0;width:340px}
+.prog i{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.6);overflow:hidden;cursor:pointer}
+.prog i b{display:block;height:100%;width:0;background:var(--green)}
+.caption{background:#fff;border-radius:18px;padding:16px 18px;margin-top:14px;text-align:center}
+.caption b{font-family:var(--fh);font-size:18px}
+.q-opt{display:inline-flex;margin:4px;padding:9px 13px;border-radius:999px;border:2px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:var(--muted)}
+.q-opt.on{border-color:var(--green);background:var(--green-l);color:var(--green-d)}
+.points{font-family:var(--fh);font-weight:700;font-size:28px;color:var(--orange)}
+.modal{position:fixed;inset:0;background:rgba(10,30,20,.45);display:none;place-items:center;z-index:50}
+.modal.on{display:grid}
+.modal .box{background:#fff;border-radius:26px;padding:28px;width:min(440px,92vw);animation:fade .3s}
+/* responsive */
+@media (max-width:1150px){.g-hero,.g-4{grid-template-columns:repeat(2,minmax(0,1fr))}.client{grid-template-columns:1fr}.story{order:2}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+  .stage{padding:0}.shell{border-radius:0;flex-direction:column;min-height:100vh}
+  .side{width:100%;flex-direction:row;padding:10px 12px;position:sticky;top:0;z-index:20;overflow-x:auto;gap:0}
+  .logo{margin:0 10px 0 0;font-size:18px}.nav{flex-direction:row}.nav button{padding:6px 8px;font-size:10.5px;min-width:64px}
+  .nav button.on::after{left:12px;right:12px;top:auto;bottom:0;width:auto;height:3px;border-radius:3px 3px 0 0}.side .spacer{display:none}
+  main{padding:16px}.g-hero,.g-4,.g-3,.g-2,.steps{grid-template-columns:1fr}
+  .hero{padding:24px}.hero .art{display:none}.phone{transform:scale(.92);transform-origin:top center}
+}
+</style>
+</head>
+<body>
+<div class="stage"><div class="shell">
+  <aside class="side">
+    <div class="logo"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.5 11h-11z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span>Supply<b>Me</b></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="spacer"></div>
+    <div class="small muted" style="text-align:center;padding:0 8px">Instacart<br>data</div>
+  </aside>
+  <main>
+    <div class="top">
+      <div class="title"><h1 id="pageTitle">Dashboard</h1><p id="pageSub"></p></div>
+      <div class="switch" role="tablist"><button id="mPro" class="on">Business</button><button id="mCli">Customer app</button></div>
+      <button class="bell" aria-label="Notifications" id="bellBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i></i></button>
+      <div class="hello"><span>Hello, SupplyMe team</span><span class="avatar" id="avatar"></span></div>
+    </div>
+    <div id="views"></div>
+  </main>
+</div></div>
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>
+const D = /*__DATA__*/{};
+const $ = s => document.querySelector(s);
+const fmt = (x, d = 0) => Number(x).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
+const usd = x => (x < 0 ? "−$" : "$") + fmt(Math.abs(x), 2);
+const pct = x => fmt(x * 100, 1) + "%";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const RAYON_FR = {"produce": "Produce", "dairy eggs": "Dairy & eggs", "snacks": "Snacks", "beverages": "Beverages",
+  "frozen": "Frozen", "pantry": "Pantry", "bakery": "Bakery", "canned goods": "Canned goods", "deli": "Deli",
+  "dry goods pasta": "Pasta & rice", "household": "Household", "breakfast": "Breakfast", "meat seafood": "Meat & seafood",
+  "personal care": "Personal care", "babies": "Babies", "international": "International", "alcohol": "Alcohol", "pets": "Pets",
+  "missing": "Unclassified", "other": "Other", "bulk": "Bulk"};
+const rfr = r => RAYON_FR[r] || r;
+const DEC = {"A — relance": ["Reminder", "var(--green)", "var(--green-l)"], "B — promo": ["Discount", "var(--orange)", "var(--orange-l)"], "C — rien": ["No action", "#8C9891", "#EEF1EF"]};
+const tag = (t, txt) => `<span class="tag ${t}">${txt || ({real: "Real data", sim: "Simulation", ex: "Example"})[t]}</span>`;
+
+/* ===================== Product illustrations ===================== */
+function art(name, rayon, size = 56) {
+  const n = (name || "").toLowerCase();
+  const has = (...k) => k.some(x => n.includes(x));
+  let bg = "#E6F6EC", g = "";
+  if (has("banana")) { bg = "#FFF4CC"; g = `<path d="M14 40c10 8 28 6 36-8l2-3-3 1c-8 9-22 11-33 5z" fill="#FFD23F" stroke="#C99A00" stroke-width="1.5"/><path d="M17 34c9 6 24 4 31-6" stroke="#F2B800" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="47" y="25" width="5" height="4" rx="1" fill="#7A5A1A" transform="rotate(30 49 27)"/>`; }
+  else if (has("strawberr", "raspberr")) { bg = "#FDE3E4"; g = `<path d="M32 50c-10-6-15-15-13-23 1-5 6-7 13-7s12 2 13 7c2 8-3 17-13 23z" fill="#E5484D"/><path d="M22 20c4 2 7 0 10-3 3 3 6 5 10 3-2 4-6 5-10 5s-8-1-10-5z" fill="#2FA35F"/>${[[27,30],[36,29],[31,37],[25,39],[38,37],[32,44]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.4" fill="#FFE08A"/>`).join("")}`; }
+  else if (has("blueberr", "grape", "acai")) { bg = "#E9E6FB"; g = [[26,26],[37,25],[31,33],[22,35],[41,34],[32,43],[25,44],[39,43]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6.5" fill="${has("red grape")?"#B2394F":"#4B4FB8"}"/><circle cx="${x-2}" cy="${y-2}" r="1.6" fill="#fff" opacity=".45"/>`).join("") + `<path d="M32 18v-6" stroke="#2FA35F" stroke-width="3" stroke-linecap="round"/>`; }
+  else if (has("avocado")) { bg = "#E3F3E1"; g = `<path d="M32 12c8 0 12 10 14 20 2 11-5 20-14 20s-16-9-14-20c2-10 6-20 14-20z" fill="#3C7A2E"/><path d="M32 18c6 0 9 8 10 15 1 8-4 14-10 14s-11-6-10-14c1-7 4-15 10-15z" fill="#C8E07A"/><circle cx="32" cy="36" r="7" fill="#8A5A2B"/>`; }
+  else if (has("kiwi")) { bg = "#EAF3DA"; g = `<circle cx="32" cy="34" r="16" fill="#8A6A3A"/><circle cx="32" cy="34" r="13" fill="#8CC63F"/><circle cx="32" cy="34" r="5" fill="#F4F1D0"/>${Array.from({length: 10}, (_, i) => `<circle cx="${32 + 8 * Math.cos(i * .628)}" cy="${34 + 8 * Math.sin(i * .628)}" r="1.1" fill="#2B2B1A"/>`).join("")}`; }
+  else if (has("lemon")) { bg = "#FFF6CF"; g = `<ellipse cx="32" cy="34" rx="17" ry="13" fill="#FFD84A" stroke="#E0B400" stroke-width="1.5"/><path d="M48 32l5-2-3 5zM16 36l-5 2 3-5z" fill="#E0B400"/>`; }
+  else if (has("lime")) { bg = "#E6F6DA"; g = `<circle cx="32" cy="34" r="15" fill="#7BC043" stroke="#4E8F25" stroke-width="1.5"/><circle cx="27" cy="29" r="3" fill="#fff" opacity=".35"/>`; }
+  else if (has("apple", "pear")) { const c = has("granny", "pear", "green") ? "#8CC63F" : "#E2483D"; bg = has("granny","pear","green") ? "#EAF6DA" : "#FDE3E1";
+    g = `<path d="M32 22c-4-4-16-3-16 10 0 11 8 20 16 18 8 2 16-7 16-18 0-13-12-14-16-10z" fill="${c}"/><path d="M32 22c0-5 2-8 5-10" stroke="#6B4423" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M34 16c5-4 10-2 11 0-5 3-8 3-11 0z" fill="#2FA35F"/><ellipse cx="25" cy="31" rx="3" ry="5" fill="#fff" opacity=".3"/>`; }
+  else if (has("spinach", "kale", "lettuce", "cilantro", "greens", "parsley", "basil", "romaine", "arugula", "celery", "herb")) { bg = "#E2F4E5";
+    g = `<path d="M20 48c-4-12 0-28 14-34 8 14 6 30-6 36z" fill="#2E9E57"/><path d="M33 50c4-12 14-20 22-18-2 12-10 20-22 18z" fill="#53B96E"/><path d="M22 47c4-10 7-20 12-31M34 49c6-5 11-9 18-14" stroke="#0F6B35" stroke-width="1.6" fill="none"/>`; }
+  else if (has("milk", "half & half", "kefir", "creamer", "almondmilk", "cream")) { bg = "#E4EEFC";
+    g = `<path d="M22 22l5-8h10l5 8v28H22z" fill="#fff" stroke="#3B6FE0" stroke-width="2"/><path d="M22 22h20l-5-8H27z" fill="#3B6FE0"/><rect x="22" y="30" width="20" height="11" fill="#CFE0FF"/><path d="M27 37c2-3 4-3 5 0s3 3 5 0" stroke="#3B6FE0" stroke-width="1.6" fill="none"/>`; }
+  else if (has("yogurt", "skyr")) { bg = "#F1EDFD"; g = `<path d="M20 24h24l-3 26H23z" fill="#fff" stroke="#7B5CE6" stroke-width="2"/><rect x="18" y="19" width="28" height="6" rx="2" fill="#7B5CE6"/><circle cx="32" cy="38" r="5" fill="#F7A8C4"/>`; }
+  else if (has("egg")) { bg = "#FFF3E2"; g = `<ellipse cx="25" cy="36" rx="9" ry="12" fill="#F7E2C6" stroke="#D9B98E" stroke-width="1.5"/><ellipse cx="39" cy="34" rx="9" ry="12" fill="#FFF8EE" stroke="#D9B98E" stroke-width="1.5"/>`; }
+  else if (has("cheese", "mozzarella", "parmesan", "cheddar", "babybel")) { bg = "#FFF6D6"; g = `<path d="M14 40l30-18 8 8v14H14z" fill="#FFCE3D" stroke="#D9A400" stroke-width="1.5"/>${[[24,40],[36,36],[44,41],[31,43]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.6" fill="#E8B000"/>`).join("")}`; }
+  else if (has("bread", "bagel", "muffin", "tortilla", "baguette", "bun", "pita", "loaf")) { bg = "#FBEBDD"; g = `<path d="M14 34c0-9 8-14 18-14s18 5 18 14v12H14z" fill="#D9934A"/><path d="M14 34c0-9 8-14 18-14s18 5 18 14" fill="#E9AE6A"/><path d="M24 26l3 5M32 24l2 6M40 26l2 5" stroke="#B36A26" stroke-width="2" stroke-linecap="round"/>`; }
+  else if (has("water", "sparkling", "juice", "kombucha", "soda", "lemonade", "tea")) { bg = "#E2F2FB"; g = `<path d="M27 12h10v6l4 6v26H23V24l4-6z" fill="#BEE6FA" stroke="#1E8BC3" stroke-width="2"/><rect x="26" y="9" width="12" height="5" rx="1.5" fill="#1E8BC3"/><rect x="23" y="31" width="18" height="9" fill="#1E8BC3"/>`; }
+  else if (has("coffee", "espresso")) { bg = "#F2E7DD"; g = `<path d="M20 18h24l-2 32H22z" fill="#7A4A2A"/><rect x="24" y="28" width="16" height="10" rx="2" fill="#F2E7DD"/><ellipse cx="32" cy="33" rx="3" ry="4" fill="#7A4A2A"/>`; }
+  else if (has("tomato", "pepper")) { const c = has("green") ? "#5BAA3A" : (has("yellow") ? "#FFC53D" : "#E5352B"); bg = "#FDE5E1";
+    g = `<circle cx="32" cy="36" r="15" fill="${c}"/><path d="M24 22c3 2 5 2 8 0 3 2 5 2 8 0-2 4-5 5-8 5s-6-1-8-5z" fill="#2FA35F"/><ellipse cx="26" cy="31" rx="3" ry="5" fill="#fff" opacity=".3"/>`; }
+  else if (has("cucumber", "zucchini")) { bg = "#E3F3E1"; g = `<rect x="12" y="26" width="40" height="13" rx="6.5" fill="#3E8E3A" transform="rotate(-20 32 32)"/><path d="M20 36l2-1M28 33l2-1M36 30l2-1M44 27l2-1" stroke="#A8D88A" stroke-width="2" stroke-linecap="round"/>`; }
+  else if (has("onion", "garlic", "shallot")) { bg = "#F6EAF2"; g = `<path d="M32 16c4 6 14 12 14 22 0 8-6 12-14 12s-14-4-14-12c0-10 10-16 14-22z" fill="${has("garlic")?"#F4EFE6":"#C98BB5"}" stroke="#8C5A7D" stroke-width="1.5"/><path d="M32 16v-6" stroke="#5E9E3A" stroke-width="2.5" stroke-linecap="round"/>`; }
+  else if (has("carrot")) { bg = "#FFEBDD"; g = `<path d="M20 18l26 22c-4 6-8 8-12 6L18 22z" fill="#FF8A34"/><path d="M18 22c-4-3-6-6-6-9 3 0 6 2 8 5 0-4 2-6 4-6 0 3 0 6-2 8z" fill="#2FA35F"/>`; }
+  else if (has("potato", "yam")) { bg = "#F5EADB"; g = `<ellipse cx="32" cy="35" rx="17" ry="12" fill="#C99A62"/>${[[26,32],[36,38],[38,30]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#8C6236"/>`).join("")}`; }
+  else if (has("broccoli", "cauliflower")) { bg = "#E2F4E5"; g = `<rect x="28" y="36" width="8" height="14" rx="3" fill="#7DBA5B"/>${[[24,30],[32,26],[40,30],[28,36],[37,36]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="${has("cauliflower")?"#F3EDE0":"#2E8B44"}"/>`).join("")}`; }
+  else if (has("broth", "stock")) { bg = "#FFF0E3"; g = `<path d="M20 26h24v20a6 6 0 0 1-6 6H26a6 6 0 0 1-6-6z" fill="#E9A23B"/><rect x="18" y="20" width="28" height="7" rx="3" fill="#B86F12"/><path d="M27 15c0 3 3 3 3 6M35 13c0 3 3 3 3 6" stroke="#C9B9A6" stroke-width="2" fill="none" stroke-linecap="round"/>`; }
+  else if (has("chicken", "beef", "steak", "turkey", "pork", "sausage", "bacon", "salmon", "shrimp")) { bg = "#FBE4E2"; g = `<path d="M16 34c0-10 10-16 22-14 10 2 12 12 6 20-6 9-28 8-28-6z" fill="#E86A5E"/><path d="M22 34c2-6 10-8 16-6" stroke="#FBD3CC" stroke-width="3" fill="none" stroke-linecap="round"/>`; }
+  else if (has("chip", "cracker", "cookie", "pretzel", "straw", "snack", "chocolate", "gum", "bar")) { bg = "#FFF0E3"; g = `<path d="M18 14h28l-3 6 3 6-3 6 3 6-3 6 3 6H18l3-6-3-6 3-6-3-6 3-6z" fill="#FF8A34"/><rect x="23" y="26" width="18" height="12" rx="4" fill="#FFF0E3"/>`; }
+  else if (has("cereal", "granola", "oat", "flakes", "waffle")) { bg = "#FFF4DA"; g = `<rect x="18" y="12" width="28" height="40" rx="3" fill="#FFC53D"/><circle cx="32" cy="32" r="8" fill="#fff"/><circle cx="30" cy="31" r="2" fill="#D9934A"/><circle cx="34" cy="34" r="2" fill="#D9934A"/>`; }
+  else if (has("hummus", "salsa", "dip", "spread", "butter", "mayonnaise", "peanut")) { bg = "#F7EEDC"; g = `<rect x="20" y="24" width="24" height="24" rx="6" fill="#E9C77B"/><rect x="18" y="18" width="28" height="8" rx="3" fill="#B98A3A"/>`; }
+  else {
+    const R = {"produce": () => (bg = "#E2F4E5", `<path d="M20 48c-4-12 0-28 14-34 8 14 6 30-6 36z" fill="#2E9E57"/>`),
+      "dairy eggs": () => (bg = "#E4EEFC", `<path d="M22 22l5-8h10l5 8v28H22z" fill="#fff" stroke="#3B6FE0" stroke-width="2"/><path d="M22 22h20l-5-8H27z" fill="#3B6FE0"/>`),
+      "frozen": () => (bg = "#E2F2FB", `<rect x="16" y="18" width="32" height="30" rx="6" fill="#BEE6FA"/><path d="M32 22v22M22 27l20 12M42 27L22 39" stroke="#1E8BC3" stroke-width="2.2" stroke-linecap="round"/>`),
+      "beverages": () => (bg = "#E2F2FB", `<path d="M27 12h10v6l4 6v26H23V24l4-6z" fill="#BEE6FA" stroke="#1E8BC3" stroke-width="2"/>`),
+      "bakery": () => (bg = "#FBEBDD", `<path d="M14 34c0-9 8-14 18-14s18 5 18 14v12H14z" fill="#D9934A"/>`),
+      "pantry": () => (bg = "#F7EEDC", `<rect x="20" y="24" width="24" height="24" rx="6" fill="#E9C77B"/><rect x="18" y="18" width="28" height="8" rx="3" fill="#B98A3A"/>`),
+      "canned goods": () => (bg = "#FDE5E1", `<rect x="20" y="16" width="24" height="34" rx="5" fill="#C9CFD3"/><rect x="20" y="24" width="24" height="16" fill="#E5352B"/>`)};
+    g = (R[rayon] || (() => (bg = "#EEF3EF", `<path d="M18 24h28l-3 24H21z" fill="#C59A6A"/><path d="M25 24a7 7 0 0 1 14 0" stroke="#8C6236" stroke-width="2.5" fill="none"/>`)))();
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="${bg}"/>${g}</svg>`;
+}
+const basketArt = () => `<svg viewBox="0 0 300 260" width="100%" aria-hidden="true"><ellipse cx="150" cy="248" rx="120" ry="10" fill="rgba(0,0,0,.12)"/>
+ <g transform="translate(40 30) scale(1.2)">${["banana", "apple", "strawberry", "avocado", "lemon"].map((p, i) => `<g transform="translate(${[10,62,112,34,88][i]} ${[30,10,34,62,62][i]})">${art(p, "", 64)}</g>`).join("")}</g>
+ <path d="M38 140h224l-20 104H58z" fill="#C8925A"/><path d="M38 140h224l-6 22H44z" fill="#B07A44"/><path d="M95 140c0-40 110-40 110 0" stroke="#8C5A2B" stroke-width="10" fill="none" stroke-linecap="round"/>
+ <text x="150" y="208" text-anchor="middle" font-family="Jost, Inter, sans-serif" font-weight="700" font-size="30" fill="#fff">SupplyMe</text></svg>`;
+
+/* ===================== Graphiques (SVG faits main) ===================== */
+function lineChart(pts, {w = 560, h = 220, color = "var(--green)", fill = true, ylab = ""} = {}) {
+  const P = 34, ys = pts.map(p => p.y), max = Math.max(...ys) * 1.1, min = 0;
+  const X = i => P + i * (w - P - 12) / (pts.length - 1), Y = v => h - 26 - (v - min) / (max - min) * (h - 46);
+  let d = pts.map((p, i) => `${i ? "L" : "M"}${X(i)},${Y(p.y)}`).join("");
+  const ticks = [0, .5, 1].map(t => max * t);
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="${ylab}">${ticks.map(t => `<line x1="${P}" x2="${w - 8}" y1="${Y(t)}" y2="${Y(t)}" stroke="#EDF1EE"/><text x="${P - 6}" y="${Y(t) + 4}" font-size="10" fill="#8C9891" text-anchor="end">${fmt(t)}</text>`).join("")}
+  ${fill ? `<path d="${d}L${X(pts.length - 1)},${h - 26}L${X(0)},${h - 26}Z" fill="${color}" opacity=".12"/>` : ""}<path d="${d}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>
+  ${pts.map((p, i) => `<g><circle cx="${X(i)}" cy="${Y(p.y)}" r="4" fill="#fff" stroke="${color}" stroke-width="2.5"><title>${p.x} : ${fmt(p.y)}</title></circle>${i % Math.ceil(pts.length / 9) === 0 ? `<text x="${X(i)}" y="${h - 8}" font-size="10" fill="#8C9891" text-anchor="middle">${p.x}</text>` : ""}</g>`).join("")}</svg>`;
+}
+function hbars(items, {fmtv = v => fmt(v, 2), max} = {}) {
+  max = max || Math.max(...items.map(i => i.v));
+  return items.map(i => `<div style="margin:10px 0"><div class="row between small"><span style="font-weight:${i.bold ? 700 : 500}">${esc(i.l)}</span><span style="font-weight:700">${fmtv(i.v)}</span></div>
+  <div class="bar" style="height:10px;margin-top:6px"><i style="width:${Math.max(2, i.v / max * 100)}%;background:${i.c || "var(--green)"}"></i></div></div>`).join("");
+}
+function donut(parts, size = 180) {
+  const tot = parts.reduce((a, p) => a + p.v, 0), R = 70, C = 2 * Math.PI * R; let off = 0;
+  return `<svg viewBox="0 0 180 180" width="${size}" role="img" aria-label="Breakdown">${parts.map(p => { const L = p.v / tot * C; const s = `<circle cx="90" cy="90" r="${R}" fill="none" stroke="${p.c}" stroke-width="20" stroke-dasharray="${L - 3} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)" stroke-linecap="round"><title>${p.l} : ${pct(p.v / tot)}</title></circle>`; off += L; return s; }).join("")}
+  <text x="90" y="88" text-anchor="middle" font-family="Jost, Inter, sans-serif" font-weight="600" font-size="30" fill="#14281D">${fmt(parts[0].v / tot * 100)}%</text><text x="90" y="110" text-anchor="middle" font-size="11" fill="#5E6B64">${esc(parts[0].l)}</text></svg>`;
+}
+const PAL = ["var(--green)", "var(--orange)", "var(--blue)", "var(--berry)", "var(--violet)", "var(--sun)"];
+const HEX = ["#1EA45C", "#FF8A34", "#3B6FE0", "#E5484D", "#7B5CE6", "#FFC53D"];
+
+/* ===================== Navigation ===================== */
+const IC = {
+  dash: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
+  pred: '<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="8"/>',
+  ai: '<rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>',
+  cust: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4 3.4-6 6.5-6s5.7 2 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c3 0 5 2 5.5 5"/>',
+  reco: '<path d="M5 8h14l-1.5 11h-11z"/><path d="M9 8a3 3 0 0 1 6 0"/>',
+  ana: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  newc: '<circle cx="10" cy="8" r="4"/><path d="M3 20c1-4 4-6 7-6 2 0 3.5.5 4.7 1.5M18 14v6M15 17h6"/>'
+};
+const VIEWS = [["dashboard", "Dashboard", IC.dash], ["predictions", "Predictions", IC.pred], ["models", "Models & AI", IC.ai],
+  ["customers", "Households", IC.cust], ["reco", "Recommendations", IC.reco], ["analytics", "Analytics", IC.ana], ["newc", "New customers", IC.newc]];
+const SUB = {dashboard: `${fmt(D.kpis.foyers)} real Instacart households · analysis date ${new Date(D.kpis.date).toLocaleDateString("en-US")}`,
+  predictions: "Products about to run out, household by household", models: "How SupplyMe learns, and how we know it is reliable",
+  customers: "Consumption habits and order history", reco: "The right basket, at the right time, at the right price",
+  analytics: "Overall performance, trends and profitability", newc: "Welcoming a customer with no history", client: "The app as a household sees it"};
+let mode = "pro", view = "dashboard";
+$("#nav").innerHTML = VIEWS.map(([k, l, ic]) => `<button data-v="${k}" class="${k === view ? "on" : ""}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg>${l}</button>`).join("");
+$("#views").innerHTML = VIEWS.map(([k]) => `<section class="view" id="v-${k}"></section>`).join("") + `<section class="view" id="v-client"></section>`;
+$("#avatar").innerHTML = art("banana", "", 44);
+const RENDER = {};
+function go(v) {
+  view = v; mode = v === "client" ? "client" : "pro";
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  $("#mPro").classList.toggle("on", mode === "pro"); $("#mCli").classList.toggle("on", mode === "client");
+  $("#pageTitle").textContent = v === "client" ? "Customer app" : VIEWS.find(x => x[0] === v)[1];
+  $("#pageSub").textContent = SUB[v];
+  const sec = $("#v-" + v); if (!sec.dataset.done) { RENDER[v](sec); sec.dataset.done = 1; }
+  if (v !== "client") demo.stop();
+}
+$("#nav").onclick = e => { const b = e.target.closest("button"); if (b) go(b.dataset.v); };
+$("#mPro").onclick = () => go("dashboard");
+$("#mCli").onclick = () => go("client");
+$("#bellBtn").onclick = () => go("client");
+const modal = html => { $("#modalBox").innerHTML = html; $("#modal").classList.add("on"); };
+$("#modal").onclick = e => { if (e.target.id === "modal" || e.target.closest("[data-close]")) $("#modal").classList.remove("on"); };
+
+/* ===================== 01 Tableau de bord ===================== */
+RENDER.dashboard = el => {
+  const k = D.kpis, dots = n => `<span class="dots">${Array.from({length: 7}, (_, i) => `<i style="height:${8 + ((i * 7 + n * 3) % 5) * 6}px"></i>`).join("")}</span>`;
+  const top = D.rayons.slice(0, 4);
+  el.innerHTML = `
+  <div class="grid g-hero">
+    <div class="hero"><span class="blob"></span><div class="art">${basketArt()}</div>
+      <h2>Never run out of the essentials.</h2>
+      <p>SupplyMe learns each household's buying rhythm, predicts when a product will run out and sends the right basket at the right time.</p>
+      <div class="row" style="flex-wrap:wrap"><button class="btn white" id="goDemo">Watch the customer demo · 35 s</button><button class="btn ghost" id="goPred" style="background:rgba(255,255,255,.18);color:#fff">Today's predictions</button></div>
+    </div>
+    <div class="card"><div class="row between"><h3>Top departments</h3>${tag("real")}</div><p class="sub">Share of items purchased · ${fmt(D.rayons.reduce((a, r) => a + r.n, 0))} order lines</p>
+      <div class="row" style="gap:18px;flex-wrap:wrap"><div>${donut([...top.map((r, i) => ({l: rfr(r.rayon), v: r.n, c: PAL[i]})), {l: "Other", v: D.rayons.slice(4).reduce((a, r) => a + r.n, 0), c: "#E4EAE6"}], 160)}</div>
+      <div style="flex:1;min-width:150px">${hbars(top.map((r, i) => ({l: rfr(r.rayon), v: r.part * 100, c: PAL[i]})), {fmtv: v => fmt(v, 0) + "%", max: 100})}</div></div></div>
+  </div>
+  <div class="grid g-4" style="margin-top:22px">
+    <div class="kpi k1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">${IC.cust}</svg></div><div class="lbl">Households analysed</div><div class="val">${fmt(k.foyers)}</div>${dots(1)}</div>
+    <div class="kpi k2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">${IC.reco}</svg></div><div class="lbl">Products tracked</div><div class="val">${fmt(k.produits)}</div>${dots(2)}</div>
+    <div class="kpi k3"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">${IC.pred}</svg></div><div class="lbl">Predictions made</div><div class="val">${fmt(k.predictions)}</div>${dots(3)}</div>
+    <div class="kpi k4"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">${IC.newc}</svg></div><div class="lbl">Recommendations generated</div><div class="val">${fmt(k.recommandations)}</div>${dots(4)}</div>
+  </div>
+  <div class="grid g-3" style="margin-top:22px">
+    <div class="card"><div class="row between"><h3>Model reliability</h3>${tag("real")}</div><p class="sub">Purchase within 7 days · unseen test period</p>
+      <div class="row" style="gap:18px">${donut([{l: "AUC", v: k.auc, c: "var(--green)"}, {l: "", v: 1 - k.auc, c: "#E4EAE6"}], 130).replace(/>\d+%</, ">" + fmt(k.auc, 3) + "<")}
+      <div class="small"><p style="margin:0 0 8px"><b>${esc(k.modele_cls)}</b>, selected on a validation period.</p><p class="muted" style="margin:0">Simple rule: ${fmt(k.auc_base, 3)}. 0.5 = coin flip.</p></div></div></div>
+    <div class="card"><div class="row between"><h3>Stock-outs anticipated</h3>${tag("real")}</div><p class="sub">Needs detected and handled on ${new Date(k.date).toLocaleDateString("en-US")}</p>
+      <div class="big" style="color:var(--green-d)">${fmt(k.besoins_imminents + k.besoins_depasses)}</div><p class="small muted">products followed up across ${fmt(k.clients_relances)} households</p>
+      ${hbars([{l: "Imminent need (within 7 days)", v: k.besoins_imminents, c: "var(--green)"}, {l: "Habit being lost", v: k.besoins_depasses, c: "var(--orange)"}], {fmtv: v => fmt(v)})}</div>
+    <div class="card"><div class="row between"><h3>Predicted timing</h3>${tag("real")}</div><p class="sub">Average error on the next purchase date</p>
+      <div class="row" style="align-items:baseline;gap:8px"><span class="big" style="color:var(--green-d)">${fmt(k.mae, 1)} d</span><span class="tag real">−${fmt((1 - k.mae / k.mae_base) * 100)}% vs simple rule</span></div>
+      ${hbars([{l: esc(k.modele_reg), v: k.mae, c: "var(--green)", bold: 1}, {l: "Simple rule", v: k.mae_base, c: "#C9D2CC"}], {fmtv: v => fmt(v, 1) + " d"})}</div>
+  </div>
+  <div class="grid g-hero" style="margin-top:22px">
+    <div class="card"><div class="row between"><h3>System activity</h3>${tag("real", "Real predictions")}</div><p class="sub">Needs forecast day by day for the next 3 weeks, and scheduled messages</p>${lineChart(D.activite.map(a => ({x: new Date(a.jour).toLocaleDateString("en-US", {day: "2-digit", month: "2-digit"}), y: a.besoins})), {ylab: "Needs forecast per day"})}<div class="legend"><span><i style="background:var(--green)"></i>Products whose need is forecast that day</span><span>${fmt(D.activite.reduce((a, x) => a + x.messages, 0))} messages scheduled</span></div></div>
+    <div class="card"><div class="row between"><h3>Campaign profit</h3>${tag("real", "Computed on real data")}</div><p class="sub">Estimated incremental profit, same products for every strategy</p>
+      ${hbars(D.strategies.filter(s => s.strategy !== "No campaign").map(s => ({l: s.strategy, v: s.incremental_profit, c: s.strategy.startsWith("SupplyMe") ? "var(--green)" : "#C9D2CC", bold: s.strategy.startsWith("SupplyMe")})), {fmtv: usd})}
+      <p class="small muted" style="margin-top:10px">Reminder effect and message cost are assumptions (see Analytics).</p></div>
+  </div>
+  <div class="card" style="margin-top:22px"><h3>How SupplyMe works</h3><p class="sub">Four steps, from the receipt to the notification</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h4>It observes</h4><p>Every order feeds the household history: which products, at what pace, at what time.</p></div>
+      <div class="step"><div class="n">2</div><h4>It predicts</h4><p>For each usual product, the model estimates the date of the next need and the probability of purchase within 7 days.</p></div>
+      <div class="step"><div class="n">3</div><h4>It decides</h4><p>Reminder, discount or nothing: it keeps the most profitable action, counting only the purchases it causes.</p></div>
+      <div class="step"><div class="n">4</div><h4>It notifies</h4><p>A pre-filled basket arrives the day before the need, one hour before the usual ordering time.</p></div>
+    </div></div>`;
+  el.querySelector("#goDemo").onclick = () => go("client");
+  el.querySelector("#goPred").onclick = () => go("predictions");
+};
+
+/* ===================== 02 Prédictions ===================== */
+RENDER.predictions = el => {
+  const foyers = [...new Set(D.besoins.map(b => b.foyer))];
+  const rayons = [...new Set(D.besoins.map(b => b.rayon))];
+  el.innerHTML = `<div class="filters"><select id="pf"><option value="">All households</option>${foyers.map(f => `<option>${f}</option>`).join("")}</select>
+    <select id="pr"><option value="">All departments</option>${rayons.map(r => `<option value="${r}">${rfr(r)}</option>`).join("")}</select>
+    <div class="chips" id="pu"><button class="chip on" data-u="">All</button><button class="chip" data-u="crit">Urgent</button><button class="chip" data-u="soon">This week</button><button class="chip" data-u="dep">Lost habit</button></div>
+    <span style="flex:1"></span>${tag("real")}</div>
+    <p class="small muted" style="margin:-6px 0 16px">Instacart cannot see inside cupboards: SupplyMe estimates the <b>day of the next need</b> and the share of the usual cycle already elapsed, not a remaining quantity.</p>
+    <div class="pgrid" id="plist"></div>`;
+  let U = "";
+  const draw = () => {
+    const f = el.querySelector("#pf").value, r = el.querySelector("#pr").value;
+    let L = D.besoins.filter(b => (!f || b.foyer == f) && (!r || b.rayon === r));
+    L = L.filter(b => !U || (U === "dep" ? b.segment === "besoin dépassé" : U === "crit" ? (b.jours <= 2 && b.segment !== "besoin dépassé") : (b.jours <= 7 && b.segment !== "besoin dépassé")));
+    el.querySelector("#plist").innerHTML = L.slice(0, 60).map(b => {
+      const dep = b.segment === "besoin dépassé", j = Math.round(b.jours), cyc = Math.min(1.5, b.depuis / Math.max(b.cycle, 1));
+      const col = dep || j <= 2 ? "var(--berry)" : j <= 5 ? "var(--orange)" : "var(--green)";
+      const conf = b.proba >= .5 ? ["High", "real"] : b.proba >= .2 ? ["Medium", "ex"] : ["Low", "sim"];
+      const [lab, c, bg] = DEC[b.decision];
+      return `<div class="pcard ${dep || j <= 2 ? "urg" : ""}"><div class="row between">${art(b.produit, b.rayon, 58)}<span class="tag" style="background:${bg};color:${c}">${lab}${b.remise ? " −" + fmt(b.remise * 100) + "%" : ""}</span></div>
+        <div class="pname">${esc(b.produit)}</div><div class="small muted">Household ${b.foyer} · ${rfr(b.rayon)}</div>
+        <div class="row between small"><span style="color:${col};font-weight:700">${dep ? "Overdue habit" : "Needed in " + j + " d"}</span><span class="muted">${new Date(b.date).toLocaleDateString("en-US", {day: "numeric", month: "short"})}</span></div>
+        <div><div class="row between small muted"><span>Cycle elapsed</span><span>${fmt(cyc * 100)}%</span></div><div class="bar" style="margin-top:5px"><i style="width:${Math.min(100, cyc / 1.5 * 100)}%;background:${col}"></i></div></div>
+        <div class="row between small"><span class="muted">Confidence</span><span class="tag ${conf[1]}">${conf[0]} · ${fmt(b.proba * 100)}%</span></div></div>`;
+    }).join("") || `<p class="muted">No product matches these filters.</p>`;
+  };
+  el.querySelector("#pf").onchange = draw; el.querySelector("#pr").onchange = draw;
+  el.querySelector("#pu").onclick = e => { const b = e.target.closest("button"); if (!b) return; U = b.dataset.u; el.querySelectorAll("#pu .chip").forEach(c => c.classList.toggle("on", c === b)); draw(); };
+  draw();
+};
+
+/* ===================== 03 Modèles & IA ===================== */
+RENDER.models = el => {
+  const cls = D.cls, reg = D.reg, best = D.kpis.modele_cls;
+  const rocSvg = (() => { const w = 360, h = 300, P = 36, X = v => P + v * (w - P - 10), Y = v => h - 30 - v * (h - 50);
+    const mods = [...new Set(D.roc.map(r => r.modele))];
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="ROC curves"><rect x="${P}" y="20" width="${w - P - 10}" height="${h - 50}" fill="#FAFCFB"/>
+      <line x1="${X(0)}" y1="${Y(0)}" x2="${X(1)}" y2="${Y(1)}" stroke="#C9D2CC" stroke-dasharray="5 5"/>
+      ${mods.map((m, i) => { const pts = D.roc.filter(r => r.modele === m); return `<path d="${pts.map((p, j) => `${j ? "L" : "M"}${X(p.fpr)},${Y(p.tpr)}`).join("")}" fill="none" stroke="${m === best ? "#1EA45C" : m === "Baseline" ? "#B9C3BD" : ["#F2A86B", "#8FA9EE", "#EE8F92", "#B3A2F0"][i % 4]}" stroke-width="${m === best ? 4 : 1.8}" opacity="${m === best ? 1 : .8}"><title>${m}</title></path>`; }).join("")}
+      <text x="${(w + P) / 2}" y="${h - 6}" font-size="11" fill="#5E6B64" text-anchor="middle">false positives</text><text x="12" y="${h / 2}" font-size="11" fill="#5E6B64" transform="rotate(-90 12 ${h / 2})" text-anchor="middle">true positives</text></svg>`; })();
+  const sc = (() => { const w = 360, h = 280, P = 34, X = v => P + v / 60 * (w - P - 10), Y = v => h - 26 - v / 60 * (h - 46);
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Actual vs predicted"><line x1="${X(0)}" y1="${Y(0)}" x2="${X(60)}" y2="${Y(60)}" stroke="var(--orange)" stroke-width="2"/>
+     ${D.rvp.map(p => `<circle cx="${X(p.reel)}" cy="${Y(p.predit)}" r="3" fill="var(--green)" opacity=".28"/>`).join("")}
+     ${[0, 30, 60].map(t => `<text x="${X(t)}" y="${h - 8}" font-size="10" fill="#8C9891" text-anchor="middle">${t} d</text><text x="${P - 6}" y="${Y(t) + 4}" font-size="10" fill="#8C9891" text-anchor="end">${t}</text>`).join("")}</svg>`; })();
+  el.innerHTML = `
+  <div class="card"><div class="row between"><h3>SupplyMe's AI in three ideas</h3>${tag("real")}</div>
+    <div class="steps" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px">
+      <div class="step"><div class="n">1</div><h4>Snapshots in time</h4><p>At a given date the model only sees the past, then we check what really happened next. It trains on January–June and is tested on August–September.</p></div>
+      <div class="step"><div class="n">2</div><h4>25 signals per product</h4><p>Days since last purchase, usual pace, regularity, share of orders containing the product, household pace…</p></div>
+      <div class="step"><div class="n">3</div><h4>A fair contest</h4><p>Five methods compete. The winner is picked on a validation period, then tested only once.</p></div>
+    </div></div>
+  <div class="grid g-2" style="margin-top:22px">
+    <div class="card"><h3>Who best predicts a purchase within 7 days?</h3><p class="sub">Test AUC (higher = better; 0.5 = chance)</p>
+      ${hbars(cls.map(c => ({l: c.model + (c.model === best ? " (selected)" : ""), v: c.AUC, c: c.model === best ? "var(--green)" : c.model === "Baseline" ? "#C9D2CC" : "#9FD9B6", bold: c.model === best})), {fmtv: v => fmt(v, 3), max: 1})}
+      <div class="note" style="margin-top:12px">On the validation period, <b>${esc(best)}</b> scores best (${fmt(D.validation[0]["AUC validation"], 3)}). With 3,000 households, a simple model generalises better. We never choose by looking at the test.</div></div>
+    <div class="card"><h3>Who best guesses the date?</h3><p class="sub">Average error in days (lower = better)</p>
+      ${hbars(reg.map(r => ({l: r.model, v: r["MAE (j)"], c: r.model === D.kpis.modele_reg ? "var(--green)" : r.model === "Baseline" ? "#C9D2CC" : "#9FD9B6", bold: r.model === D.kpis.modele_reg})), {fmtv: v => fmt(v, 1) + " d"})}
+      <div class="note" style="margin-top:12px"><b>${esc(D.kpis.modele_reg)}</b> is off by ${fmt(D.kpis.mae, 1)} days on average, versus ${fmt(D.kpis.mae_base, 1)} for the rule “usual interval minus days elapsed”.</div></div>
+  </div>
+  <div class="grid g-3" style="margin-top:22px">
+    <div class="card"><h3>ROC curves</h3><p class="sub">The higher the curve, the better the ranking</p>${rocSvg}<div class="legend"><span><i style="background:#1EA45C"></i>${esc(best)}</span><span><i style="background:#B9C3BD"></i>Simple rule</span><span><i style="background:#F2A86B"></i>Other models</span></div></div>
+    <div class="card"><h3>Most useful signals</h3><p class="sub">Relative importance in the selected model</p>${hbars(D.importance.slice(0, 7).map(i => ({l: i.description, v: i.importance, c: "var(--green)"})), {fmtv: v => fmt(v, 1) + "%"})}</div>
+    <div class="card"><h3>Actual vs predicted</h3><p class="sub">500 test predictions (days before next purchase)</p>${sc}<p class="small muted">On the orange diagonal the prediction is perfect. Individual purchases remain very variable.</p></div>
+  </div>
+  <div class="card" style="margin-top:22px"><h3>Full model table</h3><table><thead><tr><th>Model</th><th class="n">Test AUC</th><th class="n">Average precision</th><th class="n">Brier</th></tr></thead><tbody>
+    ${cls.map(c => `<tr class="${c.model === best ? "best" : ""}"><td>${esc(c.model)}</td><td class="n">${fmt(c.AUC, 3)}</td><td class="n">${fmt(c["Average Precision"], 3)}</td><td class="n">${c.Brier == null ? "—" : fmt(c.Brier, 3)}</td></tr>`).join("")}</tbody></table></div>`;
+};
+
+/* ===================== 04 Foyers ===================== */
+RENDER.customers = el => {
+  el.innerHTML = `<div class="filters"><select id="cf">${D.foyers.map(f => `<option ${f.foyer === D.foyer_demo ? "selected" : ""}>${f.foyer}</option>`).join("")}</select><span style="flex:1"></span>${tag("real")}</div><div id="cbody"></div>`;
+  const JOURS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const draw = () => {
+    const id = +el.querySelector("#cf").value, f = D.foyers.find(x => x.foyer === id), H = D.historique.filter(h => h.foyer === id), hab = D.habitudes.filter(h => h.foyer === id);
+    const gaps = H.slice(1).map((h, i) => (new Date(h.date) - new Date(H[i].date)) / 864e5), gm = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+    el.querySelector("#cbody").innerHTML = `
+    <div class="grid g-4">
+      <div class="kpi k1"><div class="lbl">Household size</div><div class="val">${f.taille} people</div><div class="small muted">official EIA distribution</div></div>
+      <div class="kpi k2"><div class="lbl">Orders</div><div class="val">${H.length}</div><div class="small muted">one every ${fmt(gm, 1)} days</div></div>
+      <div class="kpi k3"><div class="lbl">Average basket</div><div class="val">${usd(H.reduce((a, h) => a + h.montant, 0) / Math.max(H.length, 1))}</div><div class="small muted">${fmt(f.panier, 1)} items</div></div>
+      <div class="kpi k4"><div class="lbl">Usual time</div><div class="val">${JOURS[f.jour] || ""} ${f.heure}:00</div><div class="small muted">real Instacart hour</div></div>
+    </div>
+    <div class="grid g-hero" style="margin-top:22px">
+      <div class="card"><h3>Order history</h3><p class="sub">Amount of each order (prices anchored on BLS)</p>${lineChart(H.map(h => ({x: new Date(h.date).toLocaleDateString("en-US", {day: "2-digit", month: "2-digit"}), y: h.montant})), {color: "var(--blue)", ylab: "Amount"})}</div>
+      <div class="card"><h3>Recurring products</h3><p class="sub">Bought at least 3 times</p>${hab.slice(0, 6).map(h => `<div class="row" style="margin:8px 0">${art(h.produit, h.rayon, 40)}<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.produit)}</div><div class="small muted">${h.achats} purchases · every ${fmt(h.cycle, 1)} d</div></div></div>`).join("") || '<p class="muted">No habit yet.</p>'}</div>
+    </div>`;
+  };
+  el.querySelector("#cf").onchange = draw; draw();
+};
+
+/* ===================== 05 Recommandations ===================== */
+RENDER.reco = el => {
+  const ids = [...new Set(D.recos.map(r => r.foyer))];
+  el.innerHTML = `<div class="filters"><select id="rf">${ids.map(i => `<option ${i === D.foyer_demo ? "selected" : ""}>${i}</option>`).join("")}</select><span style="flex:1"></span>${tag("real", "Computed decision")}${tag("sim", "Simulated order")}</div><div id="rbody"></div>`;
+  const draw = () => {
+    const id = +el.querySelector("#rf").value, R = D.recos.filter(r => r.foyer === id), first = R[0];
+    const tot = R.reduce((a, r) => a + r.prix * (1 - r.remise), 0), save = R.reduce((a, r) => a + r.prix * r.remise, 0);
+    el.querySelector("#rbody").innerHTML = `<div class="grid g-hero">
+      <div class="card"><div class="row between"><h3>Recommended basket</h3><span class="tag ex">${R.length} products</span></div><p class="sub">Sent on ${new Date(first.envoi).toLocaleDateString("en-US", {weekday: "long", day: "numeric", month: "long"})} at ${first.heure}:00, one hour before the usual ordering time</p>
+        ${R.map(r => { const [lab, c, bg] = DEC[r.decision]; return `<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)">${art(r.produit, r.rayon, 46)}<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${esc(r.produit)}</div>
+          <div class="small muted">${r.segment === "besoin dépassé" ? "Habit being lost" : "Needed on " + new Date(r.date).toLocaleDateString("en-US", {day: "numeric", month: "short"})} · organic purchase ${fmt(r.proba * 100)}% → ${fmt(r.proba_action * 100)}%</div></div>
+          <span class="tag" style="background:${bg};color:${c}">${lab}${r.remise ? " −" + fmt(r.remise * 100) + "%" : ""}</span><div style="width:80px;text-align:right"><b>${usd(r.prix * (1 - r.remise))}</b>${r.remise ? `<div class="small muted" style="text-decoration:line-through">${usd(r.prix)}</div>` : ""}</div></div>`; }).join("")}
+        <div class="row between" style="margin-top:14px"><span class="muted">Total · you save ${usd(save)}</span><span class="big" style="font-size:26px">${usd(tot)}</span></div>
+        <button class="btn green" style="margin-top:14px" id="simCmd">Simulate the order</button></div>
+      <div class="card"><h3>Why these choices?</h3><p class="sub">SupplyMe only counts purchases caused by the message</p>
+        <div class="note"><b>Imminent need</b>: the household would probably have bought anyway, so a discount would be money given away. We send a simple reminder.</div>
+        <div class="note" style="margin-top:10px;background:var(--orange-l)"><b style="color:#B4520F">Lost habit</b>: the household has not rebought for 1.5 to 3 times its usual pace. A discount can win back several future purchases (customer lifetime value logic).</div>
+        <p class="small muted" style="margin-top:12px">Estimated incremental profit for this household: <b>${usd(R.reduce((a, r) => a + r.profit, 0))}</b>, message cost included.</p></div></div>`;
+    el.querySelector("#simCmd").onclick = () => modal(`<div class="row between">${tag("sim")}<button class="btn ghost" data-close>Close</button></div>
+      <div style="text-align:center;margin:18px 0">${basketArt().replace('width="100%"', 'width="180"')}<h3 style="font-size:24px;margin-top:6px">Simulated order</h3>
+      <p class="muted">Household ${id} · ${R.length} products · simulated delivery tomorrow</p><div class="big">${usd(tot)}</div><p class="small" style="color:var(--green-d);font-weight:600">${usd(save)} saved thanks to the offers</p></div>`);
+  };
+  el.querySelector("#rf").onchange = draw; draw();
+};
+
+/* ===================== 06 Analytics ===================== */
+RENDER.analytics = el => {
+  const J = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], mx = Math.max(...D.heat.map(h => h.n));
+  const heat = `<svg viewBox="0 0 620 210" width="100%" role="img" aria-label="Orders by day and hour">${D.heat.map(h => `<rect x="${50 + h.h * 23}" y="${8 + h.j * 26}" width="21" height="23" rx="5" fill="var(--green)" opacity="${.07 + .93 * h.n / mx}"><title>${J[h.j]} ${h.h}:00: ${h.n} orders</title></rect>`).join("")}
+    ${J.map((j, i) => `<text x="42" y="${24 + i * 26}" font-size="11" fill="#5E6B64" text-anchor="end">${j}</text>`).join("")}${[0, 6, 12, 18, 23].map(h => `<text x="${61 + h * 23}" y="202" font-size="10" fill="#8C9891" text-anchor="middle">${h}h</text>`).join("")}</svg>`;
+  const S = D.sensibilite, smax = Math.max(...S.data.flat());
+  const sens = `<table><thead><tr><th>Reminder effect ↓ / elasticity →</th>${S.columns.map(c => `<th class="n">${String(c)}</th>`).join("")}</tr></thead><tbody>${S.data.map((r, i) => `<tr><td>${S.index[i]}</td>${r.map((v, j) => `<td class="n" style="background:rgba(30,164,92,${.08 + .5 * v / smax});font-weight:${S.index[i] === "5.0%" && S.columns[j] === "2.62" ? 800 : 500}">$${fmt(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  el.innerHTML = `
+  <div class="grid g-hero"><div class="card"><div class="row between"><h3>When households order</h3>${tag("real")}</div><p class="sub">Orders by day and hour: the basis for send timing</p>${heat}</div>
+    <div class="card"><div class="row between"><h3>More history, more accuracy</h3>${tag("real")}</div><p class="sub">AUC by number of past orders</p>${hbars(D.froid_historique.map(h => ({l: h.historique + " orders", v: h.AUC, c: "var(--blue)"})), {fmtv: v => fmt(v, 3), max: 1})}</div></div>
+  <div class="grid g-2" style="margin-top:22px">
+    <div class="card"><div class="row between"><h3>Strategy profitability</h3>${tag("real", "Computed on real data")}</div><p class="sub">Incremental profit, after discount and message costs</p>
+      <table><thead><tr><th>Strategy</th><th class="n">Households</th><th class="n">Discounts</th><th class="n">Profit</th></tr></thead><tbody>${D.strategies.map(s => `<tr class="${s.strategy.startsWith("SupplyMe") ? "best" : ""}"><td>${esc(s.strategy)}</td><td class="n">${fmt(s.customers_contacted)}</td><td class="n">${usd(s.discount_cost)}</td><td class="n">${usd(s.incremental_profit)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="card"><div class="row between"><h3>What if our assumptions were wrong?</h3>${tag("sim", "Sensitivity analysis")}</div><p class="sub">SupplyMe profit by reminder effect and price elasticity (−2.62: Bijmolt et al., 2005)</p>${sens}<p class="small muted">Profit stays positive in every scenario tested.</p></div></div>`;
+};
+
+/* ===================== 07 Nouveaux clients ===================== */
+RENDER.newc = el => {
+  const q = {}; const tot = D.rayons.reduce((a, r) => a + r.n, 0); D.rayons.forEach(r => q[r.rayon] = (r.n + .5) / tot);
+  const choix = new Set(), H = D.hypotheses;
+  const opts = D.rayons.filter(r => !["missing", "other", "bulk"].includes(r.rayon)).slice(0, 14);
+  el.innerHTML = `
+  <div class="grid g-hero"><div class="card"><div class="row between"><h3>Welcome questionnaire</h3>${tag("sim", "Interactive demo")}</div><p class="sub">Pick up to 3 departments: the basket adapts and points add up</p>
+      <div id="qopts">${opts.map(r => `<button class="q-opt" data-r="${r.rayon}">${rfr(r.rayon)}</button>`).join("")}</div>
+      <div class="row between" style="margin-top:16px;flex-wrap:wrap;gap:12px"><div><span class="points" id="pts">0</span> <span class="muted">points</span> <span class="small muted" id="ptsv"></span></div><span class="small muted">${H.points_rayon} pts per department · +${H.bonus} pts for 3 departments · 100 pts = $1</span></div>
+      <h3 style="font-size:17px;margin-top:18px">Your welcome basket</h3><div class="pgrid" id="wb" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:10px"></div></div>
+    <div class="card"><div class="row between"><h3>What the real data says</h3>${tag("real")}</div><p class="sub">Real first order of 1,500 “new” customers (holdout)</p>
+      ${hbars(D.bienvenue_eval.map(e => ({l: e.method, v: e.recall_at_10, c: e.method.startsWith("Top 10") || e.method.startsWith("Welcome basket") ? "var(--green)" : e.method.startsWith("Placebo") ? "#C9D2CC" : "var(--violet)"})), {fmtv: v => fmt(v, 2) + "%"})}
+      <div class="note" style="margin-top:10px">For a very first order, <b>best-sellers</b> remain the best offer. The questionnaire is mainly used to <b>get to know the customer</b> and start the relationship.</div></div></div>
+  <div class="grid g-3" style="margin-top:22px">
+    <div class="card"><div class="row between"><h3>0 → 1 order</h3>${tag("real")}</div><p class="sub">Share of the 2nd basket we can guess</p>${hbars(D.froid_couverture.map(c => ({l: c.situation, v: c["part du 2e panier retrouvée"] * 100, c: "var(--orange)"})), {fmtv: v => fmt(v, 1) + "%", max: 40})}<p class="small muted">A single order is worth 4 times more than popularity.</p></div>
+    <div class="card"><div class="row between"><h3>After the 1st purchase</h3>${tag("real")}</div><p class="sub">Cold-start model: it relies on other customers' pace</p>${hbars(D.froid_produits.map(f => ({l: f.methode, v: f["AUC (achat sous 7 j)"], c: f.methode.startsWith("Cold-start") ? "var(--green)" : "#C9D2CC"})), {fmtv: v => "AUC " + fmt(v, 3), max: 1})}
+      <p class="small muted">Timing error: ${fmt(D.froid_produits[1]["MAE délai (j)"], 1)} d versus ${fmt(D.froid_produits[0]["MAE délai (j)"], 1)} d.</p></div>
+    <div class="card"><div class="row between"><h3>Often bought together</h3>${tag("real")}</div><p class="sub">Association rules on real baskets</p>${D.associations.filter(a => a.produit === "Banana").sort((a, b) => b.lift - a.lift).slice(0, 4).map(a => `<div class="row" style="margin:8px 0">${art("banana", "", 34)}<span class="muted">→</span>${art(a.complement, "", 34)}<div style="flex:1"><div style="font-weight:600;font-size:13px">${esc(a.complement)}</div><div class="small muted">${fmt(a.lift, 1)}× more often together</div></div></div>`).join("")}</div></div>`;
+  const top = D.top_rayon;
+  const draw = () => {
+    const k = choix.size, pts = k * H.points_rayon + (k >= 3 ? H.bonus : 0);
+    el.querySelector("#pts").textContent = pts; el.querySelector("#ptsv").textContent = "= " + usd(pts * H.valeur_point);
+    const pref = {}; Object.keys(q).forEach(r => pref[r] = ((choix.has(r) ? 1 : 0) + 30 * q[r]) / (k + 30));
+    let items;
+    if (!k) items = [...top].sort((a, b) => b.score - a.score).slice(0, 8);
+    else { const cible = Object.entries(pref).map(([r, p]) => [r, p * 8]).sort((a, b) => b[1] - a[1]); const places = {}; let used = 0;
+      cible.forEach(([r, c]) => { places[r] = Math.floor(c); used += places[r]; }); cible.sort((a, b) => (b[1] % 1) - (a[1] % 1)).slice(0, 8 - used).forEach(([r]) => places[r]++);
+      items = Object.entries(places).flatMap(([r, n]) => top.filter(t => t.rayon === r).slice(0, n)); }
+    el.querySelector("#wb").innerHTML = items.map(t => `<div class="pcard" style="padding:12px;align-items:center;text-align:center">${art(t.produit, t.rayon, 54)}<div style="font-weight:600;font-size:13px;min-height:34px">${esc(t.produit)}</div><div class="small muted">${rfr(t.rayon)} · ${usd(t.prix)}</div></div>`).join("");
+  };
+  el.querySelector("#qopts").onclick = e => { const b = e.target.closest("button"); if (!b) return; const r = b.dataset.r;
+    if (choix.has(r)) choix.delete(r); else if (choix.size < 3) choix.add(r); el.querySelectorAll(".q-opt").forEach(o => o.classList.toggle("on", choix.has(o.dataset.r))); draw(); };
+  draw();
+};
+
+/* ===================== Espace client : téléphone + démo 35 s ===================== */
+const DEMO = (() => {
+  const R = D.recos.filter(r => r.foyer === D.foyer_demo);
+  const relance = R.filter(r => r.decision === "A — relance").sort((a, b) => a.jours - b.jours);
+  const coh = relance.filter(r => r.depuis < r.cycle && Math.round(r.jours) >= 1 && r.depuis + r.jours <= r.cycle * 1.6);
+  const star = coh[0] || relance[0] || R[0];
+  const H = D.historique.filter(h => h.foyer === D.foyer_demo);
+  const hab = D.habitudes.filter(h => h.foyer === D.foyer_demo);
+  const f = D.foyers.find(x => x.foyer === D.foyer_demo);
+  return {R, star, H, hab, f};
+})();
+const TAB = (on) => `<div class="tabbar">${[["Home", IC.dash], ["Forecast", IC.pred], ["Basket", IC.reco], ["Profile", IC.cust]].map(([l, ic], i) => `<span class="${i === on ? "on" : ""}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg>${l}</span>`).join("")}</div>`;
+const cart = new Map();
+const SCREENS = {
+  home: () => { const promo = DEMO.R.find(r => r.remise) || DEMO.star; return `<div class="row between"><div><div class="small muted">Hello,</div><div class="h" style="font-size:22px;font-weight:600">Household ${D.foyer_demo}</div></div><span class="avatar">${art("avocado", "", 44)}</span></div>
+    <div class="m-hero"><div class="art">${art(promo.produit, promo.rayon, 96)}</div><b>${promo.remise ? "−" + fmt(promo.remise * 100) + "% just for you" : "Your basket is waiting"}</b><div class="small" style="opacity:.95;margin-top:4px">${esc(promo.produit)}</div></div>
+    <div class="row between"><b class="h" style="font-size:17px">Running low</b><span class="small" style="color:var(--green-d);font-weight:600">See all</span></div>
+    ${DEMO.R.slice(0, 4).map(r => itemRow(r)).join("")}`; },
+  history: () => `<b class="h" style="font-size:20px">My groceries</b><p class="small muted">${DEMO.H.length} orders · average basket ${usd(DEMO.H.reduce((a, h) => a + h.montant, 0) / DEMO.H.length)}</p>
+    ${DEMO.H.slice(-5).reverse().map(h => `<div class="m-item"><span class="avatar" style="background:var(--green-l)">${art("bag", "", 40)}</span><div class="t"><b>${new Date(h.date).toLocaleDateString("en-US", {weekday: "long", day: "numeric", month: "long"})}</b><span class="small muted">${h.produits} items</span></div><b>${usd(h.montant)}</b></div>`).join("")}`,
+  analyse: () => `<b class="h" style="font-size:20px">SupplyMe is learning your habits</b><div class="scan"><div style="text-align:center">${art(DEMO.star.produit, DEMO.star.rayon, 90)}<div class="small muted" style="margin-top:8px">${DEMO.H.length} orders · ${DEMO.hab.length} habits detected</div></div></div>
+    ${DEMO.hab.slice(0, 3).map(h => `<div class="m-item">${art(h.produit, h.rayon, 40)}<div class="t"><b>${esc(h.produit)}</b><span class="small muted">bought ${h.achats} times · every ${fmt(h.cycle, 1)} d</span></div></div>`).join("")}`,
+  predict: () => { const s = DEMO.star, cyc = Math.min(1, s.depuis / Math.max(s.cycle, 1)); return `<b class="h" style="font-size:20px">Forecast</b><div class="m-item" style="flex-direction:column;align-items:stretch;padding:18px;margin-top:12px">
+    <div class="row" style="justify-content:center">${art(s.produit, s.rayon, 110)}</div><b class="h" style="font-size:18px;text-align:center;margin-top:8px">${esc(s.produit)}</b>
+    <div style="text-align:center;margin:8px 0"><span class="big" style="color:var(--berry)">${Math.max(1, Math.round(s.jours))} d</span><div class="small muted">until the next estimated need</div></div>
+    <div class="row between small muted"><span>Usual cycle elapsed</span><span>${fmt(cyc * 100)}%</span></div><div class="bar" style="margin-top:6px;height:12px"><i class="pulse" style="width:${cyc * 100}%;background:var(--orange)"></i></div>
+    <div class="small muted" style="margin-top:10px">You buy it every ${fmt(s.cycle, 1)} days · last bought ${fmt(s.depuis)} days ago</div></div>`; },
+  notif: () => SCREENS.home() + `<div class="notif"><span class="mark" style="width:38px;height:38px;border-radius:12px;background:var(--green);display:grid;place-items:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4">${IC.reco}</svg></span><div><div class="small muted">SupplyMe · now</div><b>${esc(DEMO.star.produit)}: running low</b><div class="small">Your usual basket is ready. Add it in one tap.</div></div></div>`,
+  reco: () => `<b class="h" style="font-size:20px">Your pre-filled basket</b><p class="small muted">Prepared for ${new Date(DEMO.star.envoi).toLocaleDateString("en-US", {day: "numeric", month: "long"})}</p>
+    ${DEMO.R.slice(0, 5).map(r => itemRow(r, true)).join("")}<button class="btn green" style="width:100%;justify-content:center;margin-top:6px" data-act="addall">Add all to basket</button>`,
+  cart: () => { const items = [...cart.values()], tot = items.reduce((a, r) => a + r.prix * (1 - r.remise), 0); return `<b class="h" style="font-size:20px">My basket</b>
+    ${items.length ? items.map(r => itemRow(r)).join("") : '<p class="muted">Basket is empty.</p>'}<div class="row between" style="margin:10px 0"><span class="muted">Total</span><b class="big" style="font-size:24px">${usd(tot)}</b></div>
+    <button class="btn green" style="width:100%;justify-content:center" data-act="order">Place order</button><p class="small muted" style="text-align:center">${tag("sim")}</p>`; },
+  done: () => `<div style="text-align:center;padding-top:40px">${basketArt().replace('width="100%"', 'width="220"')}<b class="h" style="font-size:24px;display:block;margin-top:10px">Order placed!</b><p class="muted">Delivery tomorrow morning. You will never run out again.</p>${tag("sim", "Simulated restock")}</div>`,
+  welcome: () => `<b class="h" style="font-size:20px">Welcome to SupplyMe</b><p class="small muted">Tell us what you like: 10 points per department, 50 bonus points for 3 departments.</p>
+    <div>${["produce", "dairy eggs", "snacks", "beverages", "bakery", "frozen", "pantry", "deli"].map(r => `<button class="q-opt ${["produce", "dairy eggs", "bakery"].includes(r) ? "on" : ""}">${rfr(r)}</button>`).join("")}</div>
+    <div class="m-item" style="margin-top:14px;justify-content:space-between"><span>Points earned</span><span class="points">80</span></div>${tag("ex", "Example new account")}`
+};
+function itemRow(r, add) { const [lab, c, bg] = DEC[r.decision]; const dep = r.segment === "besoin dépassé";
+  return `<div class="m-item">${art(r.produit, r.rayon, 46)}<div class="t"><b>${esc(r.produit)}</b><span class="small" style="color:${dep ? "var(--berry)" : "var(--orange)"};font-weight:600">${dep ? "Buy again" : "In " + Math.max(1, Math.round(r.jours)) + " d"}</span>${r.remise ? ` <span class="tag" style="background:${bg};color:${c};padding:2px 8px">−${fmt(r.remise * 100)}%</span>` : ""}</div><b>${usd(r.prix * (1 - r.remise))}</b>${add ? `<button class="btn ghost" style="padding:6px 10px" data-add="${esc(r.produit)}">+</button>` : ""}</div>`; }
+const STORY = [
+  ["home", 0, "Lea uses SupplyMe", "Her everyday grocery app. (Real household #" + D.foyer_demo + ", fictional first name)"],
+  ["history", 0, "She does her usual shopping", "Every order enriches her history."],
+  ["analyse", 1, "SupplyMe analyses her history", "Pace, regularity, ordering time…"],
+  ["predict", 1, "A product will soon run out", "The model estimates the day of the next need."],
+  ["notif", 0, "A notification arrives", "The day before the need, one hour before her usual time."],
+  ["reco", 2, "She opens the recommendation", "A pre-filled basket with the right offer."],
+  ["done", 2, "One tap and she is restocked", "Simulated order: never run out."],
+];
+const demo = {i: 0, t: 0, timer: null, playing: false, DUR: 5000,
+  show(i, keep) { this.i = i; const [scr, tabi] = STORY[i]; const s = document.querySelector("#scrHost"); if (!s) return;
+    if (scr === "done") { DEMO.R.slice(0, 5).forEach(r => cart.set(r.produit, r)); }
+    s.innerHTML = `<div class="scr">${SCREENS[scr]()}</div>` + TAB(tabi);
+    document.querySelector("#capT").textContent = STORY[i][2]; document.querySelector("#capS").textContent = STORY[i][3];
+    document.querySelectorAll(".story button").forEach((b, k) => b.classList.toggle("on", k === i));
+    if (!keep) this.t = 0; this.paint(); },
+  paint() { document.querySelectorAll(".prog b").forEach((b, k) => b.style.width = (k < this.i ? 100 : k === this.i ? this.t / this.DUR * 100 : 0) + "%"); },
+  play() { this.playing = true; document.querySelector("#playBtn").textContent = "Pause"; clearInterval(this.timer);
+    this.timer = setInterval(() => { this.t += 100; if (this.t >= this.DUR) { if (this.i < STORY.length - 1) this.show(this.i + 1); else { this.t = this.DUR; this.paint(); this.stop(); } } else this.paint(); }, 100); },
+  stop() { this.playing = false; clearInterval(this.timer); const b = document.querySelector("#playBtn"); if (b) b.textContent = "Play"; },
+};
+RENDER.client = el => {
+  el.innerHTML = `<div class="client">
+    <div class="story"><div class="card" style="padding:18px"><div class="row between"><h3>The 35-second demo</h3>${tag("ex")}</div><p class="sub" style="margin:6px 0 0">7 steps of 5 seconds. Click a step, or tap inside the phone to explore.</p></div>
+      ${STORY.map((s, i) => `<button data-i="${i}"><span class="k">${i + 1}</span><div><b>${s[2]}</b><span>${s[3]}</span></div></button>`).join("")}</div>
+    <div><div class="phone"><div class="screen"><div class="notch"></div><div class="sbar"><span>9:41</span><span>SupplyMe</span></div><div id="scrHost"></div></div></div>
+      <div class="prog">${STORY.map((_, i) => `<i data-i="${i}"><b></b></i>`).join("")}</div>
+      <div class="ctrl"><button id="playBtn">Play</button><button id="restart">Restart</button><button id="newUser">New customer</button></div></div>
+    <div><div class="caption"><b id="capT"></b><p class="muted small" id="capS" style="margin:6px 0 0"></p></div>
+      <div class="card" style="margin-top:16px"><h3 style="font-size:17px">What the customer sees</h3><p class="small muted" style="line-height:1.55">The household only sees what helps it: its products, its need dates, its offers. Business figures (profit, models, statistics) stay in the business space.</p>
+      <div class="row" style="flex-wrap:wrap;gap:6px">${tag("real", "Real products and decisions")}${tag("ex", "Fictional name")}${tag("sim", "Simulated order")}</div></div></div></div>`;
+  el.querySelector(".story").onclick = e => { const b = e.target.closest("button[data-i]"); if (b) { demo.stop(); demo.show(+b.dataset.i); } };
+  el.querySelector(".prog").onclick = e => { const b = e.target.closest("i"); if (b) { demo.stop(); demo.show(+b.dataset.i); } };
+  el.querySelector("#playBtn").onclick = () => demo.playing ? demo.stop() : (demo.i === STORY.length - 1 && demo.t >= demo.DUR && demo.show(0), demo.play());
+  el.querySelector("#restart").onclick = () => { cart.clear(); demo.show(0); demo.play(); };
+  el.querySelector("#newUser").onclick = () => { demo.stop(); document.querySelector("#scrHost").innerHTML = `<div class="scr">${SCREENS.welcome()}</div>` + TAB(3);
+    document.querySelector("#capT").textContent = "A new customer with no history"; document.querySelector("#capS").textContent = "Welcome questionnaire, loyalty points, best-seller basket."; };
+  el.querySelector("#scrHost").onclick = e => { demo.stop();
+    const a = e.target.closest("[data-add]"); if (a) { const r = DEMO.R.find(x => x.produit === a.dataset.add); cart.set(r.produit, r); a.textContent = "Added"; a.disabled = true; return; }
+    const act = e.target.closest("[data-act]"); if (!act) return;
+    if (act.dataset.act === "addall") { DEMO.R.slice(0, 5).forEach(r => cart.set(r.produit, r)); document.querySelector("#scrHost").innerHTML = `<div class="scr">${SCREENS.cart()}</div>` + TAB(2); }
+    if (act.dataset.act === "order") { document.querySelector("#scrHost").innerHTML = `<div class="scr">${SCREENS.done()}</div>` + TAB(2); } };
+  demo.show(0); setTimeout(() => demo.play(), 600);
+};
+go("dashboard");
+</script>
+</body>
+</html>
